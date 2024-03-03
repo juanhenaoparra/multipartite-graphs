@@ -26,7 +26,8 @@
           "coordenates": {
             "x": 25,
             "y": 34
-          }
+          },
+          "color": "red"
         },
         {
           "id": 2,

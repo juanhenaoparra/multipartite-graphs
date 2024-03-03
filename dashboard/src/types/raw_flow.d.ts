@@ -1,13 +1,13 @@
-export interface RawGraph {
+interface RawGraph {
   graph: Graph[];
 }
 
-export interface Graph {
+interface Graph {
   name: string;
   data: Node[];
 }
 
-export interface Node {
+interface Node {
   id: number;
   label: string;
   coordenates: { x: number; y: number };
@@ -15,7 +15,7 @@ export interface Node {
   linkedTo: Edge[];
 }
 
-export interface Edge {
+interface Edge {
   nodeId: number;
   weight: number;
 }
