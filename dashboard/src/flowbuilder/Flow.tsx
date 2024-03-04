@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
-  SelectionMode,
   useNodesState,
   useEdgesState,
   addEdge,

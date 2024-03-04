@@ -4,16 +4,21 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom"
-import App from './App'
-import Flow from './flowbuilder/Flow'
+
+import Home from '@/routes/Home/Home'
+import Flow from '@/flowbuilder/Flow'
+import Layout from '@/routes/Layout'
 import './index.css'
-import Root from '@/routes/Root'
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <Layout />,
     children: [
+      {
+        index: true,
+        element: <Home />
+      },
       {
         path: "/graphs/:graphId",
         element: <Flow />

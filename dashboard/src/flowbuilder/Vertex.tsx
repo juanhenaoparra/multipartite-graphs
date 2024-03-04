@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import { useReactFlow, Handle, Position, NodeToolbar } from 'reactflow';
 
-export default memo(({ id, data, isConnectable }) => {
+export default memo(({ id, data, isConnectable }: any) => {
   const { getNode, setNodes, setEdges } = useReactFlow();
 
   const deleteNode = useCallback(() => {
