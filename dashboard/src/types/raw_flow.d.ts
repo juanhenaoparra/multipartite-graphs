@@ -8,7 +8,7 @@ interface Graph {
 }
 
 interface Node {
-  id: number;
+  id: string;
   label: string;
   coordenates: { x: number; y: number };
   radius: number;

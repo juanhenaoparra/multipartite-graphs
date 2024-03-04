@@ -16,7 +16,8 @@
   align-items: center;
 }
 
-.main-panel__button img {
+.main-panel__button svg {
   width: 25px;
+  height: 25px;
   margin-right: 5px;
 }

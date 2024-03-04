@@ -5,88 +5,26 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  Node,
-  Edge,
   Panel,
 } from 'reactflow';
+import { useParams } from 'react-router-dom';
 
-import graph from './components/graphs.json';
 import VertexNode from './components/Vertex';
+import { GetNodeStyle } from './storage/binding';
+import { GenRandomHex } from '@/shared/id';
 
+import NewIcon  from '@/assets/new_icon.svg?react';
 import 'reactflow/dist/style.css';
 import './Flow.css';
 
-const radiusFactor = 90;
+const getNodeId = () => `randomnode_${GenRandomHex(8)}`;
+const nodeTypes = { vertex: VertexNode }
 
-function getNodeStyle(data: any) {
-  return {
-    width: data.radius*radiusFactor,
-    height: data.radius*radiusFactor,
-    backgroundColor: data.color || '#efefef',
-  }
-}
+export default function Flow({ inputNodes, inputEdges}: any) {
+  const { graphId } = useParams();
 
-function parseGraph(graph: RawGraph) {
-  const nodes: Array<Node> = graph.graph[0].data.map((node) => ({
-    id: node.id.toString(),
-    type: 'vertex',
-    position: { x: node.coordenates.x, y: node.coordenates.y },
-    data: { label: node.label },
-    style: getNodeStyle(node),
-    className: 'vertex-circle'
-  }));
-
-  const edges = graph.graph[0].data
-    .map((node) => node.linkedTo.map((edge) => ({
-      id: `e${node.id}-${edge.nodeId}`,
-      source: node.id.toString(),
-      target: edge.nodeId.toString() })))
-    .flat();
-
-  return {
-    initialNodes: nodes,
-    initialEdges: edges
-  };
-}
-
-function genGraph(size: number) {
-  let initialNodes: Array<Node> = [];
-  let initialEdges: Array<Edge> = [];
-
-  for (let i = 0; i < size; i++) {
-    initialNodes.push({
-      id: i.toString(),
-      position: { x: Math.random() * 1000, y: Math.random() * 1000 },
-      data: { label: `Node ${i}` },
-      style: { width: 80 },
-    });
-  }
-
-  for (let i = 0; i < size; i++) {
-    const source = Math.floor(Math.random() * size);
-    const target = Math.floor(Math.random() * size);
-
-    initialEdges.push({
-      id: `e${i}-${source}-${target}`,
-      source: source.toString(),
-      target: target.toString(),
-    });
-  }
-
-  return {initialNodes, initialEdges}
-}
-
-const getNodeId = () => `randomnode_${+new Date()}`;
-
-const nodeTypes = {vertex: VertexNode}
-
-export default function Flow() {
-  // const { flow } = useLoaderData();
-
-  const { initialNodes, initialEdges } = parseGraph(graph as unknown as RawGraph);
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(inputNodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(inputEdges || []);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -97,12 +35,12 @@ export default function Flow() {
     const newNode = {
       id: getNodeId(),
       type: 'vertex',
-      data: { label: 'New Node' },
+      data: { label: 'My new node' },
       position: {
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight
       },
-      style: getNodeStyle({radius: 1, color: '#efefef'  }),
+      style: GetNodeStyle({radius: 1, color: '#efefef'  }),
       className: 'vertex-circle'
     }
 
@@ -125,8 +63,8 @@ export default function Flow() {
           <MiniMap />
           <Panel position="top-left">
             <button onClick={onAdd} className="main-panel__button">
-              <img src="/new_icon.svg"/>
-              add vertex
+              <NewIcon/>
+              add
             </button>
           </Panel>
         </ReactFlow>
