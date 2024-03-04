@@ -6,7 +6,7 @@ import {
 } from "react-router-dom"
 
 import Home from '@/routes/Home/Home'
-import Flow from '@/flowbuilder/Flow'
+import Flow from '@/routes/Graphs/Flow'
 import Layout from '@/routes/Layout'
 import './index.css'
 

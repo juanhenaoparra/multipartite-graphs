@@ -1,0 +1,22 @@
+.vertex-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #efefef;
+}
+
+.vertex-label {
+  font-size: .5em;
+  color: #484848;
+}
+
+.main-panel__button {
+  display: flex;
+  align-items: center;
+}
+
+.main-panel__button img {
+  width: 25px;
+  margin-right: 5px;
+}

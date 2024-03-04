@@ -9,11 +9,12 @@ import ReactFlow, {
   Edge,
   Panel,
 } from 'reactflow';
-import 'reactflow/dist/style.css';
 
-import graph from './graphs.json';
-import { GetFlow } from './storage';
-import VertexNode from './Vertex';
+import graph from './components/graphs.json';
+import VertexNode from './components/Vertex';
+
+import 'reactflow/dist/style.css';
+import './Flow.css';
 
 const radiusFactor = 90;
 
@@ -110,7 +111,7 @@ export default function Flow() {
 
   return (
     <>
-      <div style={{ width: '85vw', height: '90vh' }}>
+      <div style={{ width: '100%', height: '90vh', border: '#f2f2f2 2px solid'}}>
         <ReactFlow
           nodeTypes={nodeTypes}
           nodes={nodes}
