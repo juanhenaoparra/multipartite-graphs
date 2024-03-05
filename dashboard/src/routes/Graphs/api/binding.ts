@@ -36,7 +36,7 @@ export function ParseGraph(graph: RawGraph) {
   };
 }
 
-function genGraph(size: number) {
+export function GenGraph(size: number) {
   let initialNodes: Array<Node> = [];
   let initialEdges: Array<Edge> = [];
 
