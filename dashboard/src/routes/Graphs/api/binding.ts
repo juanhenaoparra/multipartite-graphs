@@ -1,3 +1,4 @@
+import { GenRandomHex } from '@/shared/id';
 import {
   Node,
   Edge,
@@ -42,10 +43,11 @@ export function GenGraph(size: number) {
 
   for (let i = 0; i < size; i++) {
     initialNodes.push({
-      id: i.toString(),
+      id: GenRandomHex(8),
+      type: 'vertex',
       position: { x: Math.random() * 1000, y: Math.random() * 1000 },
       data: { label: `Node ${i}` },
-      style: { width: 80 },
+      style: GetNodeStyle({radius: 1, color: '#efefef'  }),
     });
   }
 
