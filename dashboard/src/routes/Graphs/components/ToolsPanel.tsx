@@ -5,14 +5,14 @@ import { GetNodeStyle } from "../api/binding";
 import { useFlowContext } from "@/store/store";
 import NewIcon  from '@/assets/new_icon.svg?react';
 
-export default function Toolbar({}) {
+export default function ToolsPanel({}) {
   const [nodes, addNodes] = useFlowContext((s) => [s.nodes, s.addNodes])
 
   const onAdd = useCallback(() => {
     const newNode = {
       id: GenRandomHex(8),
       type: 'vertex',
-      data: { label: 'My new node' },
+      data: { label: 'My new node', color: '#efefef' },
       position: {
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight

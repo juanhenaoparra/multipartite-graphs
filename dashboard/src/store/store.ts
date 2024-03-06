@@ -16,7 +16,6 @@ import {
 } from 'reactflow';
 
 type NodeProps = {
-  color?: string
   label?: string
 }
 
@@ -24,6 +23,7 @@ interface FlowProps {
   id: string
   nodes: Node<NodeProps>[]
   edges: Edge[]
+  nodesMap: Map<string, Node>
 }
 
 export interface FlowState extends FlowProps {
@@ -32,8 +32,10 @@ export interface FlowState extends FlowProps {
   onConnect: OnConnect
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
+  getNodeById: (nodeId: string) => Node | undefined
   addNodes: (nodes: Node[]) => void
   updateNodeData: (nodeId: string, data: NodeProps) => void
+  updateNodeStyle: (nodeId: string, style: React.CSSProperties) => void
 }
 
 type FlowStore = ReturnType<typeof createFlowStore>
@@ -43,7 +45,12 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
     id: '',
     nodes: [],
     edges: [],
+    nodesMap: new Map(),
   }
+
+  initProps.nodes?.forEach((node) => {
+    initProps.nodesMap.set(node.id, node)
+  })
 
   return createStore<FlowState>()((set, get) => ({
     ...defaultProps,
@@ -77,7 +84,14 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
 
       set({ edges });
     },
+    getNodeById: (nodeId: string): Node | undefined => {
+      return get().nodesMap.get(nodeId);
+    },
     addNodes: (nodes: Node[]) => {
+      nodes.forEach((node) => {
+        get().nodesMap.set(node.id, node);
+      });
+
       set({
         nodes: [...get().nodes, ...nodes]
       });
@@ -99,7 +113,25 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
           return node;
         })
       })
-    }
+    },
+    updateNodeStyle: (nodeId: string, style: React.CSSProperties) => {
+      set({
+        nodes: get().nodes.map((node) => {
+          if (node.id === nodeId) {
+            Object.keys(style).forEach((key) => {
+              if (!!style[key]) {
+                node.style = {
+                  ...node.style,
+                  [key]: style[key],
+                };
+              }
+            })
+          }
+
+          return node;
+        })
+      })
+    },
   }))
 }
 

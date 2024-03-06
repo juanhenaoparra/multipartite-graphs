@@ -8,7 +8,7 @@ import { useStoreWithEqualityFn } from 'zustand/traditional'
 
 import VertexNode from './components/Vertex';
 import { FlowContext, FlowState, createFlowStore } from '@/store/store';
-import Toolbar from './components/Toolbar';
+import ToolsPanel from './components/ToolsPanel';
 
 import 'reactflow/dist/style.css';
 import './Flow.css';
@@ -51,7 +51,7 @@ export default function Flow({ inputNodes, inputEdges}: any) {
         >
           <Controls />
           <MiniMap />
-          <Toolbar />
+          <ToolsPanel />
         </ReactFlow>
       </div>
     </FlowContext.Provider>

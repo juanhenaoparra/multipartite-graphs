@@ -8,7 +8,7 @@
 
 .vertex-label {
   font-size: .5em;
-  color: #484848;
+  word-wrap: normal;
 }
 
 .main-panel__button {
@@ -20,4 +20,20 @@
   width: 25px;
   height: 25px;
   margin-right: 5px;
+}
+
+.node-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.node-toolbar button {
+  background-color: #6c9dff;
+  color: white;
+}
+
+.node-toolbar input {
+  max-width: 12em;
 }
