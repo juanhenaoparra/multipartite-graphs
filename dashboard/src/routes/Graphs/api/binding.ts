@@ -1,34 +1,39 @@
 import { GenRandomHex } from '@/shared/id';
 import {
-  Node,
-  Edge,
+  Node as RFNode,
+  Edge as RFEdge,
 } from 'reactflow';
 
-const radiusFactor = 90;
+export const RADIUS_FACTOR = 90;
 
 export function GetNodeStyle(data: any) {
   return {
-    width: data.radius*radiusFactor,
-    height: data.radius*radiusFactor,
+    width: data.radius*RADIUS_FACTOR,
+    height: data.radius*RADIUS_FACTOR,
     backgroundColor: data.color || '#efefef',
   }
 }
 
 export function ParseGraph(graph: RawGraph) {
-  const nodes: Array<Node> = graph.graph[0].data.map((node) => ({
+  const nodes: Array<RFNode> = graph.graph[0].data.map((node) => ({
     id: node.id.toString(),
     type: 'vertex',
     position: { x: node.coordenates.x, y: node.coordenates.y },
-    data: { label: node.label },
+    data: { label: node.label, radius: node.radius },
     style: GetNodeStyle(node),
     className: 'vertex-circle'
   }));
 
-  const edges: Array<Edge> = graph.graph[0].data
+  const edges: Array<RFEdge> = graph.graph[0].data
     .map((node) => node.linkedTo.map((edge) => ({
+      type: "default",
       id: `e${node.id}-${edge.nodeId}`,
       source: node.id.toString(),
-      target: edge.nodeId.toString() })))
+      target: edge.nodeId.toString(),
+      data: {
+        weight: edge.weight,
+      },
+    })))
     .flat();
 
   return {
@@ -37,9 +42,50 @@ export function ParseGraph(graph: RawGraph) {
   };
 }
 
+export function ExportGraph(id: string, nodes: RFNode[], edges: RFEdge[]): RawGraph {
+  let graph: Graph = {
+    name: id,
+    data: []
+  }
+
+  const exportGraph: RawGraph = {
+    graph: [
+      graph
+    ]
+  }
+
+  graph.data = nodes.map(node => {
+    const graphNode: GraphNode = {
+      id: node.id,
+      label: node.data?.label || "empty_label",
+      radius: node.data?.radius,
+      coordenates: {
+        x: node.position.x,
+        y: node.position.y,
+      },
+      linkedTo: []
+    }
+
+    const foundEdges = edges.filter((edge => {
+      return edge.source == node.id
+    }))
+
+    foundEdges.forEach(edge => {
+      graphNode.linkedTo.push({
+        nodeId: node.id,
+        weight: edge.data?.weight
+      })
+    })
+
+    return graphNode
+  })
+
+  return exportGraph
+}
+
 export function GenGraph(size: number) {
-  let initialNodes: Array<Node> = [];
-  let initialEdges: Array<Edge> = [];
+  let initialNodes: Array<RFNode> = [];
+  let initialEdges: Array<RFEdge> = [];
 
   for (let i = 0; i < size; i++) {
     initialNodes.push({

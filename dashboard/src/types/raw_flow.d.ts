@@ -4,18 +4,18 @@ interface RawGraph {
 
 interface Graph {
   name: string;
-  data: Node[];
+  data: GraphNode[];
 }
 
-interface Node {
+interface GraphNode {
   id: string;
   label: string;
   coordenates: { x: number; y: number };
   radius: number;
-  linkedTo: Edge[];
+  linkedTo: GraphEdge[];
 }
 
-interface Edge {
-  nodeId: number;
+interface GraphEdge {
+  nodeId: string;
   weight: number;
 }

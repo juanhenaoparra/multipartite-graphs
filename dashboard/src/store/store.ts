@@ -14,6 +14,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from 'reactflow';
+import { ExportGraph } from '@/routes/Graphs/api/binding';
 
 type NodeProps = {
   label?: string
@@ -26,6 +27,11 @@ interface FlowProps {
   nodesMap: Map<string, Node>
 }
 
+interface FlowExportProps {
+  blobURL: string
+  filename: string
+}
+
 export interface FlowState extends FlowProps {
   onNodesChange: OnNodesChange
   onEdgesChange: OnEdgesChange
@@ -36,6 +42,7 @@ export interface FlowState extends FlowProps {
   addNodes: (nodes: Node[]) => void
   updateNodeData: (nodeId: string, data: NodeProps) => void
   updateNodeStyle: (nodeId: string, style: React.CSSProperties) => void
+  export: () => FlowExportProps
 }
 
 type FlowStore = ReturnType<typeof createFlowStore>
@@ -132,6 +139,15 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
         })
       })
     },
+    export: (): FlowExportProps => {
+      const graphId = get().id
+      const rawGraph = ExportGraph(graphId, get().nodes, get().edges)
+      let blob = new Blob([JSON.stringify(rawGraph)], {type: "application/json"})
+      return {
+        filename: graphId,
+        blobURL: window.URL.createObjectURL(blob)
+      }
+    }
   }))
 }
 
