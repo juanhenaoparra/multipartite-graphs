@@ -11,19 +11,30 @@
   word-wrap: normal;
 }
 
-.main-panel__button {
+.main-panel {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
+  gap: 5px;
 }
 
-.main-panel__button svg {
-  width: 25px;
-  height: 25px;
+.main-panel button {
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+  font-size: 0.7em;
+  text-align: right;
+  background-color: rgb(220, 220, 220);
+}
+
+.main-panel button svg {
+  width: 15px;
+  height: 15px;
   margin-right: 5px;
 }
 
 .node-toolbar {
-  display: flex;
+    display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
