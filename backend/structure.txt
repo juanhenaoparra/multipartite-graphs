@@ -1,0 +1,26 @@
+backend/
+├── main.py
+├── app/
+│   ├── __init__.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── endpoints/
+│   │   │   ├── __init__.py
+│   │   │   ├── json_upload.py
+│   │   │   └── ... (otros endpoints)
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── ... (modelos de datos)
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── ... (servicios y lógica de negocio)
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── ... (funciones y utilidades reutilizables)
+│   ├── exceptions.py
+│   ├── config.py
+│   └── dependencies.py
+├── tests/
+│   └── ... (pruebas unitarias y de integración)
+├── requirements.txt
+└── README.md
