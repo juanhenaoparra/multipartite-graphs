@@ -10,6 +10,7 @@ from app.config.settings import get_db
 
 router = APIRouter()
 
+
 @router.post("/upload")
 def upload(graph: graph_schema.GraphSchema, db: Session = Depends(get_db)):
     graph_create = graph_controller.create_graph(db=db, new_graph=graph)
