@@ -1,24 +1,32 @@
 import { GenRandomHex } from "@/shared/id";
 import React, { useCallback } from "react";
 import { Panel } from "reactflow";
-import { GetNodeStyle } from "../api/binding";
+import { GetNodeStyle, ParseGraph } from "../api/binding";
 import { useFlowContext } from "@/store/store";
 import NewIcon  from '@/assets/new_icon.svg?react';
 import DownloadIcon  from '@/assets/download_icon.svg?react';
+import UploadIcon  from '@/assets/upload_icon.svg?react';
+
+const defaultNodeRadius = 1
 
 export default function ToolsPanel({}) {
-  const [nodes, addNodes, graphExport] = useFlowContext((s) => [s.nodes, s.addNodes, s.export])
+  const [nodes, addNodes, graphExport, setNodes, setEdges] = useFlowContext((s) => [s.nodes, s.addNodes, s.export, s.setNodes, s.setEdges])
 
   const onAdd = useCallback(() => {
     const newNode = {
       id: GenRandomHex(8),
       type: 'vertex',
-      data: { label: 'My new node', color: '#efefef' },
+      data: {
+        label: 'My new node',
+        backgroundColor: '#efefef',
+        color: '#000000',
+        radius: defaultNodeRadius,
+      },
       position: {
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight
       },
-      style: GetNodeStyle({radius: 1, color: '#efefef'  }),
+      style: GetNodeStyle({radius: defaultNodeRadius, backgroundColor: '#efefef'}),
       className: 'vertex-circle'
     }
 
@@ -33,11 +41,34 @@ export default function ToolsPanel({}) {
     tempLink.click();
   }, [nodes])
 
+  const onImport = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        let graph = JSON.parse(e.target.result as string);
+        graph = ParseGraph(graph)
+
+        setNodes(graph.initialNodes)
+        setEdges(graph.initialEdges)
+      }
+      reader.readAsText(file);
+    }
+    input.click();
+  }, [nodes])
+
   return (
     <Panel position="top-left" className="main-panel">
       <button onClick={onAdd}>
         <NewIcon/>
         add
+      </button>
+      <button onClick={onImport}>
+        <UploadIcon/>
+        import
       </button>
       <button onClick={onExport}>
         <DownloadIcon/>

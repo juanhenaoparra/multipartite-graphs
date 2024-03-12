@@ -2,15 +2,17 @@ import { GenRandomHex } from '@/shared/id';
 import {
   Node as RFNode,
   Edge as RFEdge,
+  MarkerType,
 } from 'reactflow';
 
-export const RADIUS_FACTOR = 90;
+const defaultNodeRadius = 1
+export const RADIUS_FACTOR = 90
 
 export function GetNodeStyle(data: any) {
   return {
     width: data.radius*RADIUS_FACTOR,
     height: data.radius*RADIUS_FACTOR,
-    backgroundColor: data.color || '#efefef',
+    backgroundColor: data.backgroundColor || '#efefef',
   }
 }
 
@@ -19,19 +21,25 @@ export function ParseGraph(graph: RawGraph) {
     id: node.id.toString(),
     type: 'vertex',
     position: { x: node.coordenates.x, y: node.coordenates.y },
-    data: { label: node.label, radius: node.radius },
-    style: GetNodeStyle(node),
+    data: { label: node.label, radius: node.radius || defaultNodeRadius },
+    style: GetNodeStyle({
+      radius: node.radius || defaultNodeRadius,
+      backgroundColor: node.data?.backgroundColor,
+      color: node.data?.color,
+    }),
     className: 'vertex-circle'
   }));
 
   const edges: Array<RFEdge> = graph.graph[0].data
     .map((node) => node.linkedTo.map((edge) => ({
-      type: "default",
       id: `e${node.id}-${edge.nodeId}`,
+      type: "weightedge",
       source: node.id.toString(),
       target: edge.nodeId.toString(),
+      markerEnd: { type: MarkerType.ArrowClosed },
       data: {
         weight: edge.weight,
+        color: edge.color || "#222222"
       },
     })))
     .flat();
@@ -59,6 +67,10 @@ export function ExportGraph(id: string, nodes: RFNode[], edges: RFEdge[]): RawGr
       id: node.id,
       label: node.data?.label || "empty_label",
       radius: node.data?.radius,
+      data: {
+        backgroundColor: node.style?.backgroundColor,
+        color: node.style?.color,
+      },
       coordenates: {
         x: node.position.x,
         y: node.position.y,
@@ -72,8 +84,9 @@ export function ExportGraph(id: string, nodes: RFNode[], edges: RFEdge[]): RawGr
 
     foundEdges.forEach(edge => {
       graphNode.linkedTo.push({
-        nodeId: node.id,
-        weight: edge.data?.weight
+        nodeId: edge.target,
+        weight: edge.data?.weight,
+        color: edge.style?.stroke,
       })
     })
 
@@ -92,8 +105,8 @@ export function GenGraph(size: number) {
       id: GenRandomHex(8),
       type: 'vertex',
       position: { x: Math.random() * 1000, y: Math.random() * 1000 },
-      data: { label: `Node ${i}` },
-      style: GetNodeStyle({radius: 1, color: '#efefef'  }),
+      data: { label: `Node ${i}`, radius: defaultNodeRadius},
+      style: GetNodeStyle({radius: defaultNodeRadius, backgroundColor: '#efefef'}),
     });
   }
 
