@@ -9,6 +9,7 @@ import Home from '@/routes/Home/Home'
 import Flow from '@/routes/Graphs/Flow'
 import Layout from '@/routes/Layout'
 import './index.css'
+import NewFlow from './routes/Graphs/NewFlow'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,14 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />
       },
+      {
+        path: "/graphs/new",
+        element: <NewFlow />
+      },
+      // {
+      //   path: "/graphs/open",
+      //   element: <OpenFlow />
+      // },
       {
         path: "/graphs/:graphId",
         element: <Flow />
