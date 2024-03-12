@@ -1,4 +1,5 @@
 from typing import Optional
+from fastapi import HTTPException
 
 from sqlalchemy.orm import Session
 import ast
@@ -11,7 +12,7 @@ def create_graph(db: Session, new_graph: graph_schema.GraphSchema) -> graph_sche
     graph_create= graph_model.Graph(**new_graph.model_dump())
     new_graph=graph_model.Graph(name=graph_create.name, data=str(graph_create.data))
     db.add(new_graph)
-    
+
     # Realizar la operación de confirmación para guardar los cambios en la base de datos
     db.commit()
     db.refresh(new_graph)
@@ -22,6 +23,10 @@ def create_graph(db: Session, new_graph: graph_schema.GraphSchema) -> graph_sche
 
 def fetch_graph_by_name(db: Session, graph_name: str) -> dict:
     graph = db.query(graph_model.Graph).filter(graph_model.Graph.name == graph_name).first()
+
+    if graph is None:
+        raise HTTPException(status_code=404, detail="Graph not found")
+
     response = {"name": graph.name, "data": ast.literal_eval(graph.data)}
     print(response)
     return response

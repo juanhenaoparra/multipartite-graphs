@@ -8,7 +8,7 @@ import os
 
 config = Config(os.getcwd()+"/app/config/.env")
 
-PROJECT_NAME = "Backend anal"
+PROJECT_NAME = "Backend Graphs API"
 PROJECT_VERSION = "1.0.0"
 
 DEBUG = config("DEBUG", cast=bool, default=False)
