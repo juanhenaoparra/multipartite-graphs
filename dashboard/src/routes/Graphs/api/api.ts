@@ -2,7 +2,6 @@ import { API_HOST } from '@/shared/env';
 import axios from 'axios';
 
 export async function GetFlow(id: string): Promise<RawGraph> {
-  console.log(API_HOST)
   const response = await axios.get(`${API_HOST}/api/graphs/${id}`);
   return response.data;
 }
