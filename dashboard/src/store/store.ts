@@ -13,8 +13,10 @@ import {
   OnConnect,
   applyNodeChanges,
   applyEdgeChanges,
+  MarkerType,
 } from 'reactflow';
 import { ExportGraph } from '@/routes/Graphs/api/binding';
+import { GenRandomHex } from '@/shared/id';
 
 type NodeProps = {
   label?: string
@@ -25,6 +27,7 @@ interface FlowProps {
   nodes: Node<NodeProps>[]
   edges: Edge[]
   nodesMap: Map<string, Node>
+  edgesMap: Map<string, Edge>
 }
 
 interface FlowExportProps {
@@ -39,9 +42,12 @@ export interface FlowState extends FlowProps {
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
   getNodeById: (nodeId: string) => Node | undefined
+  getEdgeById: (edgeId: string) => Edge | undefined
   addNodes: (nodes: Node[]) => void
   updateNodeData: (nodeId: string, data: NodeProps) => void
   updateNodeStyle: (nodeId: string, style: React.CSSProperties) => void
+  updateEdgeData: (edgeId: string, data: any) => void
+  updateEdgeStyle: (edgeId: string, style: React.CSSProperties) => void
   export: () => FlowExportProps
 }
 
@@ -53,10 +59,15 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
     nodes: [],
     edges: [],
     nodesMap: new Map(),
+    edgesMap: new Map(),
   }
 
   initProps.nodes?.forEach((node) => {
     initProps.nodesMap.set(node.id, node)
+  })
+
+  initProps.edges?.forEach((edge) => {
+    initProps.edgesMap.set(edge.id, edge)
   })
 
   return createStore<FlowState>()((set, get) => ({
@@ -73,9 +84,20 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
       });
     },
     onConnect: (connection: Connection) => {
+      const newEdge: Edge = {
+        id: GenRandomHex(8),
+        source: connection.source,
+        target: connection.target,
+        type: 'weightedge',
+        markerEnd: { type: MarkerType.ArrowClosed },
+        data: { weight: 0 },
+      }
+
       set({
-        edges: addEdge(connection, get().edges),
+        edges: addEdge(newEdge, get().edges),
       });
+
+      get().edgesMap.set(newEdge.id, newEdge);
     },
     setNodes: (nodes: Node[]) => {
       if (nodes.length === 0) {
@@ -92,7 +114,10 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
       set({ edges });
     },
     getNodeById: (nodeId: string): Node | undefined => {
-      return get().nodesMap.get(nodeId);
+      return get().nodes.find((node) => node.id === nodeId);
+    },
+    getEdgeById: (edgeId: string): Edge | undefined => {
+      return get().edges.find((edge) => edge.id === edgeId);
     },
     addNodes: (nodes: Node[]) => {
       nodes.forEach((node) => {
@@ -125,6 +150,10 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
       set({
         nodes: get().nodes.map((node) => {
           if (node.id === nodeId) {
+            if (!node.style) {
+              node.style = {}
+            }
+
             Object.keys(style).forEach((key) => {
               if (!!style[key]) {
                 node.style = {
@@ -136,6 +165,46 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
           }
 
           return node;
+        })
+      })
+    },
+    updateEdgeData: (edgeId: string, data: any) => {
+      set({
+        edges: get().edges.map((edge) => {
+          if (edge.id === edgeId) {
+            if (!edge.data) {
+              edge.data = {}
+            }
+
+            Object.keys(data).forEach((key) => {
+              if (!!data[key]) {
+                edge.data = {
+                  ...edge.data,
+                  [key]: data[key],
+                };
+              }
+            })
+          }
+
+          return edge;
+        })
+      })
+    },
+    updateEdgeStyle: (edgeId: string, style: React.CSSProperties) => {
+      set({
+        edges: get().edges.map((edge) => {
+          if (edge.id === edgeId) {
+            Object.keys(style).forEach((key) => {
+              if (!!style[key]) {
+                edge.style = {
+                  ...edge.style,
+                  [key]: style[key],
+                };
+              }
+            })
+          }
+
+          return edge;
         })
       })
     },

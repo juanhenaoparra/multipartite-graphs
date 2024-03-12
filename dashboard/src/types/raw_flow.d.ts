@@ -7,15 +7,22 @@ interface Graph {
   data: GraphNode[];
 }
 
+interface GraphNodeData {
+  color?: string;
+  backgroundColor?: string;
+}
+
 interface GraphNode {
   id: string;
   label: string;
-  coordenates: { x: number; y: number };
   radius: number;
+  data?: GraphNodeData;
+  coordenates: { x: number; y: number };
   linkedTo: GraphEdge[];
 }
 
 interface GraphEdge {
   nodeId: string;
   weight: number;
+  color?: string;
 }

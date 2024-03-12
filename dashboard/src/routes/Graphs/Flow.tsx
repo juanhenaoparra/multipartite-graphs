@@ -6,14 +6,18 @@ import ReactFlow, {
 import { useParams } from 'react-router-dom';
 import { useStoreWithEqualityFn } from 'zustand/traditional'
 
-import VertexNode from './components/Vertex';
 import { FlowContext, FlowState, createFlowStore } from '@/store/store';
 import ToolsPanel from './components/ToolsPanel';
+import WeightEdge from './components/WeightEdge';
+import VertexNode from './components/Vertex';
 
 import 'reactflow/dist/style.css';
 import './Flow.css';
 
 const nodeTypes = { vertex: VertexNode }
+const edgeTypes = {
+  weightedge: WeightEdge,
+};
 
 const selector = (state: FlowState) => ({
   nodes: state.nodes,
@@ -21,7 +25,6 @@ const selector = (state: FlowState) => ({
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
-  addNodes: state.addNodes,
 });
 
 export default function Flow({ inputNodes, inputEdges}: any) {
@@ -42,6 +45,7 @@ export default function Flow({ inputNodes, inputEdges}: any) {
       <div style={{ width: '100%', height: '90vh', border: '#f2f2f2 2px solid'}}>
         <ReactFlow
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           nodes={state.nodes}
           edges={state.edges}
           onNodesChange={state.onNodesChange}
