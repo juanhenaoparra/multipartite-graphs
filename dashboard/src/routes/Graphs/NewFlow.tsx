@@ -39,7 +39,7 @@ export default function NewFlow({}) {
 
   return (
     <>
-      <h1>New Flow</h1>
+      <h1>New Graph</h1>
       <div className="container">
         <form onSubmit={handleSubmit}>
           <div>

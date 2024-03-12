@@ -19,14 +19,6 @@ export const NavbarItemsData = [
         title: 'Open',
         url: 'open'
       },
-      {
-        title: 'Import',
-        url: 'import'
-      },
-      {
-        title: 'Export',
-        url: 'export'
-      }
     ]
   },
   {

@@ -10,6 +10,7 @@ import Flow from '@/routes/Graphs/Flow'
 import Layout from '@/routes/Layout'
 import './index.css'
 import NewFlow from './routes/Graphs/NewFlow'
+import OpenFlow from './routes/Graphs/OpenFlow'
 
 const router = createBrowserRouter([
   {
@@ -24,10 +25,10 @@ const router = createBrowserRouter([
         path: "/graphs/new",
         element: <NewFlow />
       },
-      // {
-      //   path: "/graphs/open",
-      //   element: <OpenFlow />
-      // },
+      {
+        path: "/graphs/open",
+        element: <OpenFlow />
+      },
       {
         path: "/graphs/:graphId",
         element: <Flow />
