@@ -22,7 +22,7 @@ async def handle_json_upload(file: UploadFile):
         contents = await file.read()
         data = contents.decode()
         json_data = json.loads(data)
-        
+
         # Extraer la parte deseada del JSON
         graph_data = json_data.get('graph')
         if graph_data:

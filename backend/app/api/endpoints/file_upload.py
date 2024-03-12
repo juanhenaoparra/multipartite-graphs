@@ -15,7 +15,6 @@ router = APIRouter()
 def upload(graph: graph_schema.GraphSchema, db: Session = Depends(get_db)):
     graph_create = graph_controller.create_graph(db=db, new_graph=graph)
 
-    print(graph)
     response = graph_create
     return  response
 
@@ -34,6 +33,5 @@ async def upload_json(file: UploadFile = File(...), db: Session = Depends(get_db
         graph_schema_obj = graph_schema.GraphSchema(**graph_data)
         graph_create = graph_controller.create_graph(db=db, new_graph=graph_schema_obj)
 
-        print(graph_schema_obj)
         response = graph_create
         return response
