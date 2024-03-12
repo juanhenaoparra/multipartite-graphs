@@ -2,8 +2,9 @@
 *.pyc
 
 # Ignorar el directorio virtualenv
-/venv/
-env/
+/venv/*
+env/*
 
 # Ignorar archivos de configuración local
 .env
+*.db
