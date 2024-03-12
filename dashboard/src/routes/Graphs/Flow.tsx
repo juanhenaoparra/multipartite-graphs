@@ -25,6 +25,8 @@ const edgeTypes = {
 const selector = (state: FlowState) => ({
   nodes: state.nodes,
   edges: state.edges,
+  setNodes: state.setNodes,
+  setEdges: state.setEdges,
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
@@ -33,20 +35,30 @@ const selector = (state: FlowState) => ({
 export default function Flow({ inputNodes, inputEdges}: any) {
   const { graphId } = useParams()
 
+  const store = useRef(
+    createFlowStore({
+      id: graphId,
+      nodes: inputNodes || [],
+      edges: inputEdges || [],
+    })
+  ).current
+
+  const state = useStoreWithEqualityFn(store, selector)
+
   useEffect(() => {
     if (
       graphId == '' ||
       (inputNodes && inputNodes.length > 0) ||
       (inputEdges && inputEdges.length > 0)
-    ) {
+      ) {
       return
     }
 
     GetFlow(graphId).then((flow) => {
       const {initialNodes, initialEdges} = ParseGraph(flow)
 
-      inputNodes = initialNodes
-      inputEdges = initialEdges
+      state.setNodes(initialNodes)
+      state.setEdges(initialEdges)
     }).catch((err) => {
       if (!axios.isAxiosError(err)) {
         throw err
@@ -64,16 +76,6 @@ export default function Flow({ inputNodes, inputEdges}: any) {
       throw err
     })
   }, [graphId])
-
-  const store = useRef(
-    createFlowStore({
-      id: graphId,
-      nodes: inputNodes || [],
-      edges: inputEdges || [],
-    })
-  ).current
-
-  const state = useStoreWithEqualityFn(store, selector)
 
   return (
     <FlowContext.Provider value={store}>

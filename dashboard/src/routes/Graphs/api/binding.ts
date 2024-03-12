@@ -16,8 +16,10 @@ export function GetNodeStyle(data: any) {
   }
 }
 
-export function ParseGraph(graph: RawGraph) {
-  const nodes: Array<RFNode> = graph.graph[0].data.map((node) => ({
+export function ParseGraph(graph: Graph ) {
+  let receivedGraph: Graph = graph
+
+  const nodes: Array<RFNode> = receivedGraph.data.map((node) => ({
     id: node.id.toString(),
     type: 'vertex',
     position: { x: node.coordenates.x, y: node.coordenates.y },
@@ -30,7 +32,7 @@ export function ParseGraph(graph: RawGraph) {
     className: 'vertex-circle'
   }));
 
-  const edges: Array<RFEdge> = graph.graph[0].data
+  const edges: Array<RFEdge> = receivedGraph.data
     .map((node) => node.linkedTo.map((edge) => ({
       id: `e${node.id}-${edge.nodeId}`,
       type: "weightedge",

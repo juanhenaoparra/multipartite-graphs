@@ -10,9 +10,8 @@ export default function OpenFlow({}) {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    GetFlow(graphId).then((flow) => {
-      const {initialNodes, initialEdges} = ParseGraph(flow)
-      navigate(`/graphs/${graphId}`, {state: { initialNodes, initialEdges }})
+    GetFlow(graphId).then(() => {
+      navigate(`/graphs/${graphId}`)
     }).catch((e) => {
       alert('Error fetching graph: ' + e)
     })
