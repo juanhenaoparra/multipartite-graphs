@@ -17,6 +17,7 @@ import {
 } from 'reactflow';
 import { ExportGraph } from '@/routes/Graphs/api/binding';
 import { GenRandomHex } from '@/shared/id';
+import { SaveFlow } from '@/routes/Graphs/api/api';
 
 type NodeProps = {
   label?: string
@@ -49,6 +50,7 @@ export interface FlowState extends FlowProps {
   updateEdgeData: (edgeId: string, data: any) => void
   updateEdgeStyle: (edgeId: string, style: React.CSSProperties) => void
   export: () => FlowExportProps
+  save: () => void
 }
 
 type FlowStore = ReturnType<typeof createFlowStore>
@@ -216,7 +218,15 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
         filename: graphId,
         blobURL: window.URL.createObjectURL(blob)
       }
-    }
+    },
+    save: () => {
+      const graphId = get().id
+      const rawGraph = ExportGraph(graphId, get().nodes, get().edges)
+
+      SaveFlow(rawGraph.graph[0]).then((res) => {
+        console.log('Graph saved', res)
+      })
+    },
   }))
 }
 

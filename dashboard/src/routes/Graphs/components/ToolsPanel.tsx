@@ -6,11 +6,12 @@ import { useFlowContext } from "@/store/store";
 import NewIcon  from '@/assets/new_icon.svg?react';
 import DownloadIcon  from '@/assets/download_icon.svg?react';
 import UploadIcon  from '@/assets/upload_icon.svg?react';
+import SaveIcon  from '@/assets/save_icon.svg?react';
 
 const defaultNodeRadius = 1
 
 export default function ToolsPanel({}) {
-  const [nodes, addNodes, graphExport, setNodes, setEdges] = useFlowContext((s) => [s.nodes, s.addNodes, s.export, s.setNodes, s.setEdges])
+  const [nodes, addNodes, graphExport, saveGraph, setNodes, setEdges] = useFlowContext((s) => [s.nodes, s.addNodes, s.export, s.save, s.setNodes, s.setEdges])
 
   const onAdd = useCallback(() => {
     const newNode = {
@@ -60,6 +61,10 @@ export default function ToolsPanel({}) {
     input.click();
   }, [nodes])
 
+  const onSave = useCallback(() => {
+    saveGraph()
+  }, [nodes])
+
   return (
     <Panel position="top-left" className="main-panel">
       <button onClick={onAdd}>
@@ -73,6 +78,10 @@ export default function ToolsPanel({}) {
       <button onClick={onExport}>
         <DownloadIcon/>
         export
+      </button>
+      <button onClick={onSave}>
+        <SaveIcon/>
+        save
       </button>
     </Panel>
   )
