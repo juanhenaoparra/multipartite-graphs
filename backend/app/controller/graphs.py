@@ -28,5 +28,4 @@ def fetch_graph_by_name(db: Session, graph_name: str) -> dict:
         raise HTTPException(status_code=404, detail="Graph not found")
 
     response = {"name": graph.name, "data": ast.literal_eval(graph.data)}
-    print(response)
     return response

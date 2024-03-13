@@ -1,5 +1,6 @@
 # Ignorar archivos de Byte-compiled / generado automáticamente
 *.pyc
+*/__pycache__/*
 
 # Ignorar el directorio virtualenv
 /venv/*
