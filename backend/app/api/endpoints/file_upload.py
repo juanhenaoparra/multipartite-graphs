@@ -26,9 +26,11 @@ def get_graph_by_name(graph_name: str, db: Session = Depends(get_db)):
 async def upload_json(file: UploadFile = File(...), db: Session = Depends(get_db)):
     processed_json = await json_upload_service.handle_json_upload(file)
     if "error" in processed_json:
+        print("me quede en el error al procesar el json")
         return processed_json
     else:
         # Llamar al método upload con el JSON procesado
+        print(processed_json)
         graph_data = processed_json
         graph_schema_obj = graph_schema.GraphSchema(**graph_data)
         graph_create = graph_controller.create_graph(db=db, new_graph=graph_schema_obj)

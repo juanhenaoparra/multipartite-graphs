@@ -7,17 +7,24 @@ import json
 from ..schemas import graphs as graph_schema
 from ..models import graph as graph_model
 
-
 def create_graph(db: Session, new_graph: graph_schema.GraphSchema) -> graph_schema.GraphSchema:
-    graph_create= graph_model.Graph(**new_graph.model_dump())
-    new_graph=graph_model.Graph(name=graph_create.name, data=str(graph_create.data))
-    db.add(new_graph)
+    existing_graph = db.query(graph_model.Graph).filter_by(name=new_graph.name).first()
+    graph_create = graph_model.Graph(**new_graph.model_dump())
 
-    # Realizar la operación de confirmación para guardar los cambios en la base de datos
-    db.commit()
-    db.refresh(new_graph)
-    # Devolver la instancia de Graph que acabas de añadir a la base de datos
-    return new_graph
+    if existing_graph:
+        # Si existe un grafo con el mismo nombre, actualizarlo
+        existing_graph.data = str(graph_create.data)
+        db.commit()
+        db.refresh(existing_graph)
+        return existing_graph
+    else:
+        # Si no existe un grafo con el mismo nombre, crear uno nuevo
+        
+        new_graph = graph_model.Graph(name=graph_create.name, data=str(graph_create.data))
+        db.add(new_graph)
+        db.commit()
+        db.refresh(new_graph)
+        return new_graph
 
 
 
