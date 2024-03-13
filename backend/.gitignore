@@ -1,10 +1,12 @@
 # Ignorar archivos de Byte-compiled / generado automáticamente
 *.pyc
 */__pycache__/*
+__pycache__
 
 # Ignorar el directorio virtualenv
 /venv/*
 env/*
+env/
 
 # Ignorar archivos de configuración local
 .env
