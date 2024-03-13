@@ -1,6 +1,5 @@
-import { useFlowContext } from '@/store/store';
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { EdgeProps, getBezierPath, EdgeLabelRenderer, BaseEdge, BezierEdge, useKeyPress, useOnSelectionChange } from 'reactflow';
+import React, { FC, useEffect, useState } from 'react';
+import { EdgeProps, getBezierPath, EdgeLabelRenderer, BaseEdge, useKeyPress, useOnSelectionChange } from 'reactflow';
 import EdgeContextMenu from './EdgeContextMenu';
 
 const WeightEdge: FC<EdgeProps> = ({
@@ -45,6 +44,18 @@ const WeightEdge: FC<EdgeProps> = ({
     targetPosition,
   });
 
+  if (data?.color) {
+    style = { ...style, stroke: data.color };
+  }
+
+  if (data?.lineType === 'dashed') {
+    style = { ...style, strokeDasharray: '5, 5' };
+  }
+
+  if (data?.lineType === 'continue') {
+    style = { ...style, strokeDasharray: '' };
+  }
+
   return (
     <>
       <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={style}/>
@@ -77,6 +88,7 @@ const WeightEdge: FC<EdgeProps> = ({
               id={id}
               color={style?.stroke}
               weight={contextMenuData.weight}
+              lineType={data?.lineType || "continue"}
             />
           }
         </div>

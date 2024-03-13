@@ -41,7 +41,8 @@ export function ParseGraph(graph: Graph ) {
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
         weight: edge.weight,
-        color: edge.color || "#222222"
+        color: edge.color || "#222222",
+        lineType: edge.lineType || "continue",
       },
     })))
     .flat();
@@ -88,7 +89,8 @@ export function ExportGraph(id: string, nodes: RFNode[], edges: RFEdge[]): RawGr
       graphNode.linkedTo.push({
         nodeId: edge.target,
         weight: edge.data?.weight,
-        color: edge.style?.stroke,
+        color: edge.data?.color,
+        lineType: edge.data?.lineType,
       })
     })
 

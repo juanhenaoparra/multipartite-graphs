@@ -25,4 +25,5 @@ interface GraphEdge {
   nodeId: string;
   weight: number;
   color?: string;
+  lineType?: string;
 }
