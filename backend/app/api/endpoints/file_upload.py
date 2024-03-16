@@ -2,6 +2,7 @@
 from fastapi import APIRouter, File, UploadFile
 from app.services import json_upload_service
 from app.schemas import graphs as graph_schema
+from app.schemas import generation as gen_schema
 from app.controller import graphs as graph_controller
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -37,3 +38,7 @@ async def upload_json(file: UploadFile = File(...), db: Session = Depends(get_db
 
         response = graph_create
         return response
+
+@router.post("/new", response_model=graph_schema.GraphSchema)
+async def create_random_graph(graph_input: gen_schema.GenGraphInput, db: Session = Depends(get_db)):
+    return graph_controller.create_random_graph(db, graph_input)
