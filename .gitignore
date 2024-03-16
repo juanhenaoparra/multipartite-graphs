@@ -1,2 +1,4 @@
 dashboard/node_modules/*
 dashboard/.next
+venv
+venv/*
