@@ -7,14 +7,14 @@ class NodeCoordenates(BaseModel):
 
 class NodeEdge(BaseModel):
     nodeId: str
-    weight: float
+    weight: Optional[float]
     color: Optional[str] = Field(default="#000000")
 
 class GraphNode(BaseModel):
     id: str
     label: str
     data: Optional[Dict[str, Any]] = Field(default={})
-    coordenates: NodeCoordenates
+    coordenates: Optional[NodeCoordenates]
     linkedTo: List[NodeEdge]
 
 class GraphSchema(BaseModel):
