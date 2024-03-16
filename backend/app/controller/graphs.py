@@ -42,4 +42,10 @@ def create_random_graph(db: Session, graph_input: gen_schema.GenGraphInput):
     adjacencyList = GenerateGraph(graph_input)
     graph = TransformToGraphSchema(adjacencyList=adjacencyList)
 
+    newGraphAsDict = graph.model_dump()
+    newGraphModel = graph_model.Graph(name=graph.name, data=str(newGraphAsDict["data"]))
+    db.add(newGraphModel)
+    db.commit()
+    db.refresh(newGraphModel)
+
     return graph
