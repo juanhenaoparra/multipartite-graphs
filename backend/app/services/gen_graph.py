@@ -1,4 +1,4 @@
-from typing import Dict, List, Sequence
+from typing import Dict, List
 import random
 
 from app.schemas.generation import GenGraphInput, AdjacencyNode

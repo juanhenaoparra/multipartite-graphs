@@ -15,7 +15,6 @@ async def handle_json_upload(file: UploadFile):
                 "name": graph.get('name'),
                 "data": graph.get('data')
             }
-            #print(desired_json)
             return desired_json
         else:
             return {"error": "El JSON no contiene la clave 'graph' o no tiene el formato esperado."}
