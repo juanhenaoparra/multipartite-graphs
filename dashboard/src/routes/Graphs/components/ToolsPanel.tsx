@@ -2,16 +2,18 @@ import { GenRandomHex } from "@/shared/id";
 import React, { useCallback } from "react";
 import { Panel } from "reactflow";
 import { GetNodeStyle, ParseGraph } from "../api/binding";
+import { RunCheckBipartite } from "../api/api";
 import { useFlowContext } from "@/store/store";
 import NewIcon  from '@/assets/new_icon.svg?react';
 import DownloadIcon  from '@/assets/download_icon.svg?react';
 import UploadIcon  from '@/assets/upload_icon.svg?react';
 import SaveIcon  from '@/assets/save_icon.svg?react';
+import RunIcon  from '@/assets/run_icon.svg?react';
 
 const defaultNodeRadius = 1
 
 export default function ToolsPanel({}) {
-  const [nodes, addNodes, graphExport, saveGraph, setNodes, setEdges] = useFlowContext((s) => [s.nodes, s.addNodes, s.export, s.save, s.setNodes, s.setEdges])
+  const [graphId, nodes, addNodes, graphExport, saveGraph, setNodes, setEdges, doReload] = useFlowContext((s) => [s.id, s.nodes, s.addNodes, s.export, s.save, s.setNodes, s.setEdges, s.doReload])
 
   const onAdd = useCallback(() => {
     const newNode = {
@@ -65,6 +67,18 @@ export default function ToolsPanel({}) {
     saveGraph()
   }, [nodes])
 
+  const onRunCheckBipartite = useCallback(() => {
+    saveGraph().then(() => {
+      RunCheckBipartite(graphId).then((res) => {
+        if (res.isBipartite == false) {
+          alert(`Checking bipartiteness: ${res.reason}`)
+        }
+
+        doReload()
+      })
+    })
+  }, [graphId])
+
   return (
     <Panel position="top-left" className="main-panel">
       <button onClick={onAdd}>
@@ -82,6 +96,10 @@ export default function ToolsPanel({}) {
       <button onClick={onSave}>
         <SaveIcon/>
         save
+      </button>
+      <button className="run-icon" onClick={onRunCheckBipartite}>
+        <RunIcon/>
+        bipartite
       </button>
     </Panel>
   )

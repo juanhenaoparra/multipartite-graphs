@@ -23,6 +23,7 @@ const edgeTypes = {
 };
 
 const selector = (state: FlowState) => ({
+  reload: state.reload,
   nodes: state.nodes,
   edges: state.edges,
   setNodes: state.setNodes,
@@ -75,7 +76,7 @@ export default function Flow({ inputNodes, inputEdges}: any) {
 
       throw err
     })
-  }, [graphId])
+  }, [graphId, state.reload])
 
   return (
     <FlowContext.Provider value={store}>

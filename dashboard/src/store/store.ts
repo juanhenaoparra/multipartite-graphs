@@ -29,6 +29,7 @@ interface FlowProps {
   edges: Edge[]
   nodesMap: Map<string, Node>
   edgesMap: Map<string, Edge>
+  reload: number
 }
 
 interface FlowExportProps {
@@ -50,7 +51,8 @@ export interface FlowState extends FlowProps {
   updateEdgeData: (edgeId: string, data: any) => void
   updateEdgeStyle: (edgeId: string, style: React.CSSProperties) => void
   export: () => FlowExportProps
-  save: () => void
+  save: () => Promise<void>
+  doReload: () => void
 }
 
 type FlowStore = ReturnType<typeof createFlowStore>
@@ -62,6 +64,7 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
     edges: [],
     nodesMap: new Map(),
     edgesMap: new Map(),
+    reload: 0
   }
 
   initProps.nodes?.forEach((node) => {
@@ -219,14 +222,19 @@ export const createFlowStore = (initProps?: Partial<FlowProps>) => {
         blobURL: window.URL.createObjectURL(blob)
       }
     },
-    save: () => {
+    save: async () => {
       const graphId = get().id
       const rawGraph = ExportGraph(graphId, get().nodes, get().edges)
 
-      SaveFlow(rawGraph.graph[0]).then((res) => {
-        console.log('Graph saved', res)
-      })
+      const res = await SaveFlow(rawGraph.graph[0]);
+      console.log('Graph saved', res);
+      return null
     },
+    doReload: () => {
+      set({
+        reload: get().reload+1
+      })
+    }
   }))
 }
 

@@ -28,3 +28,9 @@ export async function GenRandomFlow(input: GenRandomFlowInput) {
     return response.data;
   })
 }
+
+export async function RunCheckBipartite(graphId: string) {
+  return await axios.get(`${API_HOST}/api/bipartite/${graphId}`).then((response) => {
+    return response.data;
+  })
+}
