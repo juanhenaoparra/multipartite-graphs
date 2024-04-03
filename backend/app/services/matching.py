@@ -25,23 +25,36 @@ class CheckBipartite:
         Receives a graph and determines if it is bipartite.
         The algorithm is based on the fact that a graph is bipartite if and only if it is 2-colorable.
         """
+        res = BipartiteMatchResponse(isBipartite=False)
+
         for node in self.g.data:
+            nodeGroup = res.get_node_group(node.id)
+            if nodeGroup == -1:
+                nodeGroup = res.get_max_group() + 1
+
             if node.id in self.colored: # skip already colored nodes
                 continue
 
             children = self.g.get_children(node.id)
             if children is None or len(children) == 0: # set first color to isolated nodes
                 self.set_color(node.id, 0)
+                res.add_node_to_group(node.id, nodeGroup)
                 continue
 
             queue = [node]
             self.set_color(node.id, 1)
+            childrenToAdd = {node.id}
 
             while queue:
                 v = queue.pop()
                 oppositeColor = 1 - self.colored[v.id]
 
                 for child in self.g.get_children(v.id):
+                    childrenToAdd.add(child.id)
+                    auxGroup = res.get_node_group(child.id)
+                    if auxGroup != -1: # change group if any child already belongs to a group
+                        nodeGroup = auxGroup
+
                     if child.id in self.colored:
                         if self.colored[child.id] == self.colored[v.id]:
                             raise NotBipartiteException("graph is not bipartite")
@@ -49,7 +62,12 @@ class CheckBipartite:
                         self.set_color(child.id, oppositeColor)
                         queue.append(child)
 
-        return BipartiteMatchResponse(isBipartite=True)
+            for c in childrenToAdd:
+                res.add_node_to_group(c, nodeGroup)
+
+        res.isBipartite = True
+
+        return res
 
 
 def pick_opposite_color(color: str, colorsList: List[str]) -> str:
