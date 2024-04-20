@@ -6,6 +6,7 @@ from app.schemas import bipartite as bipartite_schema
 from app.schemas import generation as gen_schema
 from app.controller import graphs as graph_controller
 from app.controller import processes as process_controller
+from app.services.min_cut import get_subgraph
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -46,3 +47,7 @@ async def create_random_graph(graph_input: gen_schema.GenGraphInput, db: Session
 @router.get("/bipartite/{graph_name}", response_model=bipartite_schema.BipartiteMatchResponse)
 async def check_bipartiteness(graph_name: str, db: Session = Depends(get_db)):
     return process_controller.check_bipartiteness(db, graph_name)
+
+@router.get("/bipartite/{graph_name}/min-cut", response_model=bipartite_schema.BipartiteMatchResponse)
+async def check_bipartiteness(graph_name: str, db: Session = Depends(get_db)):
+    return process_serv.get_subgraph(db, graph_name)
