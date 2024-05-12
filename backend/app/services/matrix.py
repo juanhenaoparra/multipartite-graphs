@@ -77,6 +77,9 @@ def marginalize(matrix: np.ndarray, tensors: int, positions: list, axis: int):
     if axis == 1:
         new_m = 2 ** (tensors-len(positions))
         new_n = n
+    else:
+        new_m = m
+        new_n = 2 ** (tensors-len(positions))
 
     new_matrix = np.full((new_m, new_n), np.nan)
     sum_count = 2 ** len(positions)
@@ -93,16 +96,19 @@ def marginalize(matrix: np.ndarray, tensors: int, positions: list, axis: int):
     walked_rows = 0
     counter = 0
     bottom = 0
-    m_iterator = {x for x in range(m)}
 
-    while walked_rows < m:
-        bottom = min(m_iterator)
+    max_size = m if axis == 1 else n
+    iterator = {x for x in range(max_size)}
+
+
+    while walked_rows < max_size:
+        bottom = min(iterator)
         top = bottom+top_limit
         rows_to_sum = []
 
         for _ in range(round(sum_count/2)):
-            m_iterator.remove(bottom)
-            m_iterator.remove(top)
+            iterator.remove(bottom)
+            iterator.remove(top)
             rows_to_sum.append(bottom)
             rows_to_sum.append(top)
 
@@ -110,7 +116,10 @@ def marginalize(matrix: np.ndarray, tensors: int, positions: list, axis: int):
             bottom += step_size
             top -= step_size
 
-        new_matrix[counter] = matrix[rows_to_sum, :].sum(axis=0) / 2
+        if axis == 1:
+            new_matrix[counter , :] = matrix[rows_to_sum , :].sum(axis=0) / 2
+        else:
+            new_matrix[: , counter] = matrix[: , rows_to_sum].sum(axis=1) / 2
 
         counter += 1
 
