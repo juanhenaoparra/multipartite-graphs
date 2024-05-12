@@ -1,4 +1,6 @@
+from typing import List
 import numpy as np
+import math
 
 def product_tensor(matrix: np.ndarray, row: int = None):
     """
@@ -8,8 +10,7 @@ def product_tensor(matrix: np.ndarray, row: int = None):
 
     If the row parameter is passed, the resultant matrix shape will be: (1, 2^(n/2))
     """
-    m = matrix.shape[0]
-    n = matrix.shape[1]
+    m, n = matrix.shape
     components = int(n/2)
     columns = 2**components
 
@@ -60,3 +61,57 @@ def get_emd(a, b):
         d_sum += d[i]
 
     return d_sum
+
+def marginalize(matrix: np.ndarray, tensors: int, positions: list, axis: int):
+    """
+    Marginalize a matrix along an axis removing the position element.
+
+    params:
+    @matrix: np.ndarray    -> matrix to marginalize
+    @position: List[int]   -> positions to remove
+    @axis: int             -> 0: row, 1: column
+    @significant_side: int -> 0: left, 1: right
+    """
+    m, n = matrix.shape
+
+    if axis == 1:
+        new_m = 2 ** (tensors-len(positions))
+        new_n = n
+
+    new_matrix = np.full((new_m, new_n), np.nan)
+    sum_count = 2 ** len(positions)
+    top_limit = 0
+    step_size = math.inf
+
+    for x in positions:
+        x_exp = 2**x
+        top_limit += x_exp
+
+        if x_exp < step_size:
+            step_size = x_exp
+
+    walked_rows = 0
+    counter = 0
+    bottom = 0
+    m_iterator = {x for x in range(m)}
+
+    while walked_rows < m:
+        bottom = min(m_iterator)
+        top = bottom+top_limit
+        rows_to_sum = []
+
+        for _ in range(round(sum_count/2)):
+            m_iterator.remove(bottom)
+            m_iterator.remove(top)
+            rows_to_sum.append(bottom)
+            rows_to_sum.append(top)
+
+            walked_rows += 2
+            bottom += step_size
+            top -= step_size
+
+        new_matrix[counter] = matrix[rows_to_sum, :].sum(axis=0) / 2
+
+        counter += 1
+
+    return new_matrix
