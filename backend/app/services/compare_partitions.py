@@ -179,9 +179,10 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
 
     for partition in partitions:
         distance = calculate_partition_distance(matrix, original_distribution, binary_distribution, base_cause, partition, memo)
+        absolute_distance = abs(distance)
 
-        if distance < min_distance:
-            min_distance = distance
+        if absolute_distance < min_distance:
+            min_distance = absolute_distance
             min_partition = partition
 
     return MinimumPartitionResponse(binary_distribution=binary_distribution, partition=min_partition, distance=min_distance)
