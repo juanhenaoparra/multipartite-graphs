@@ -2,8 +2,10 @@ from typing import Dict, Tuple
 import numpy as np
 from pydantic import BaseModel
 from .matrix import get_binary_position, product_tensor_with_cut, recursive_marginalization, get_emd
+from .partitions_generator import gen_system_partitions
 
 class Memo(BaseModel):
+    binary_distribution: str = ""
     matrix: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
     marginalizations: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
 
@@ -35,6 +37,11 @@ class Memo(BaseModel):
             space[effect] = {}
 
         space[effect][cause] = m
+
+class MinimumPartitionResponse(BaseModel):
+    binary_distribution: str
+    partition: list
+    distance: float
 
 def find_insertion_pos(l, to_insert):
     for i, num in enumerate(l):
@@ -145,3 +152,36 @@ def calculate_partition_distance(matrix: np.ndarray, original: np.ndarray, binar
     partition_joined_m = product_tensor_with_cut(partition_joined, 0, partition_a.shape[1], partitions[1])
 
     return get_emd(original[0], partition_joined_m[0])
+
+def calculate_minimum_partition(full_system: list, matrix, binary_distribution: str) -> MinimumPartitionResponse:
+    """
+    Calculate the minimum partition of a system given a matrix and a binary distribution.
+
+    Args:
+        original_system (list): The original system.
+        matrix (np.ndarray): The matrix of the system.
+        binary_distribution (str): The binary distribution of the system.
+
+    Returns:
+        MinimumPartitionResponse: The minimum partition of the system with its details
+    """
+    memo = Memo(binary_distribution=binary_distribution)
+    partitions = gen_system_partitions(full_system)
+    base_effect = tuple(full_system[0])
+    base_cause = tuple(full_system[1])
+
+    matrix = np.array(matrix)
+
+    original_distribution = get_probability_distribution(p_matrix=matrix, binary_distribution=binary_distribution, target_effect=base_effect, target_cause=base_cause, base_cause=base_cause, memo=memo)
+
+    min_distance = float("inf")
+    min_partition = None
+
+    for partition in partitions:
+        distance = calculate_partition_distance(matrix, original_distribution, binary_distribution, base_cause, partition, memo)
+
+        if distance < min_distance:
+            min_distance = distance
+            min_partition = partition
+
+    return MinimumPartitionResponse(binary_distribution=binary_distribution, partition=min_partition, distance=min_distance)

@@ -60,7 +60,7 @@ def gen_system_partitions(m):
     all_combinations =[[], []]
 
     for i, row in enumerate(m):
-      for j in range(1, len(row)+1): # 1 to n-1 because we don't want to include the full or empty row
+      for j in range(1, len(row)): # 1 to n-1 because we don't want to include the full or empty row
           for combination in iter_combinations(row, j):
               all_combinations[i].append(combination)
 
