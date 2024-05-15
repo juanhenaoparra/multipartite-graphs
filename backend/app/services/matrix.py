@@ -51,7 +51,7 @@ def product_tensor(matrix: np.ndarray, row: int = None):
 
     return m_tensor
 
-def product_tensor_with_cut(matrix: np.ndarray, row: int, cut: int, left_side_exp: int):
+def product_tensor_with_cut(matrix: np.ndarray, row: int, cut: int, left_side_exp: list[int]):
     """
     Do product tensor of a matrix given a cut column. The cut column is the column where the matrix will be divided.
 
@@ -71,8 +71,8 @@ def product_tensor_with_cut(matrix: np.ndarray, row: int, cut: int, left_side_ex
 
     for i in range(columns):
         full_bin = bin(i)[2:].zfill(tensors)[::-1]
-        left_index = get_binary_position(full_bin[left_side_exp])
-        right_index = get_binary_position(full_bin, unmask=[left_side_exp])
+        left_index = get_binary_position(full_bin, mask=left_side_exp)
+        right_index = get_binary_position(full_bin, unmask=left_side_exp)
 
         vector_tensor[0][i] = matrix[row][left_index] * matrix[row][cut+right_index]
 

@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 import numpy as np
 from pydantic import BaseModel
-from .matrix import get_binary_position, product_tensor_with_cut, recursive_marginalization
+from .matrix import get_binary_position, product_tensor_with_cut, recursive_marginalization, get_emd
 
 class Memo(BaseModel):
     matrix: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
@@ -44,6 +44,24 @@ def find_insertion_pos(l, to_insert):
     return len(l)
 
 def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str, target_effect: tuple, target_cause:tuple, base_cause: tuple, memo: Memo):
+    """
+    Calculate the probability distribution of a target effect given a target cause and a base cause.
+    The strategy used at this level is top-down recursion with memoization.
+    Where the probability distribution of the target effect is calculated by the product tensor of the leftmost target effect variable and the probability distribution of the rightest target effect, which is calculated recursively.
+
+    The memoization structure is accessed by a target effect and a target cause.
+
+    Args:
+        p_matrix (np.ndarray): The probability matrix.
+        binary_distribution (str): The binary distribution of the system.
+        target_effect (tuple): The target effect to calculate the probability.
+        target_cause (tuple): The target cause to calculate the probability.
+        base_cause (tuple): The base cause of the target effect.
+        memo (Memo): The memoization object to store the results.
+
+    Returns:
+        np.ndarray: The probability distribution of the target effect given the target cause and the base cause.
+    """
     if not target_effect or len(target_effect) == 0:
         return None
 
@@ -98,8 +116,32 @@ def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str,
     cut = leftmost_resultant.shape[1]
     insert_position = find_insertion_pos(l=rightest, to_insert=leftmost_target)
 
-    r = product_tensor_with_cut(concatenated_matrix, row_index, cut=cut, left_side_exp=insert_position)
+    r = product_tensor_with_cut(concatenated_matrix, row_index, cut=cut, left_side_exp=[insert_position])
 
     memo.add(target_effect, target_cause, r) # memoize resultant
 
     return r
+
+def calculate_partition_distance(matrix: np.ndarray, original: np.ndarray, binary_distribution: str, base_cause: tuple, partitions: list[tuple], memo: Memo):
+    """
+    Calculate the distance between two partitions of a system given a matrix and a binary distribution.
+
+    Args:
+        matrix (np.ndarray): The matrix of the system.
+        original (np.ndarray): The original matrix of the system.
+        binary_distribution (str): The binary distribution of the system.
+        base_cause (tuple): The base cause of the system.
+        partitions (list[tuple]): A list containing the partitions of the system.
+        memo (Memo): The memoization object to store the results.
+
+    Returns:
+        float: The distance between the two partitions.
+    """
+    partition_a = get_probability_distribution(p_matrix=matrix, binary_distribution=binary_distribution, target_effect=partitions[0], target_cause=partitions[1], base_cause=base_cause, memo=memo)
+
+    partition_b = get_probability_distribution(p_matrix=matrix, binary_distribution=binary_distribution, target_effect=partitions[2], target_cause=partitions[3], base_cause=base_cause, memo=memo)
+
+    partition_joined = np.concatenate([partition_a, partition_b], axis=1)
+    partition_joined_m = product_tensor_with_cut(partition_joined, 0, partition_a.shape[1], partitions[1])
+
+    return get_emd(original[0], partition_joined_m[0])
