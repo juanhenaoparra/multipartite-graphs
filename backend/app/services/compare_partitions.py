@@ -1,29 +1,40 @@
 from typing import Dict, Tuple
 import numpy as np
 from pydantic import BaseModel
-from .matrix import get_binary_position, product_tensor_with_cut, marginalize
+from .matrix import get_binary_position, product_tensor_with_cut, recursive_marginalization
 
 class Memo(BaseModel):
     matrix: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
+    marginalizations: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
 
     class Config:
         arbitrary_types_allowed = True
 
-    def get(self, effect: tuple, cause: tuple):
+    def get(self, effect: tuple, cause: tuple, scope=None):
+        space = self.matrix
+
+        if scope == "MG":
+            space = self.marginalizations
+
         try:
-            m = self.matrix[effect][cause]
+            m = space[effect][cause]
             return m
         except:
             return None
 
-    def add(self, effect: tuple, cause: tuple, m):
-        if self.get(effect=effect, cause=cause) is not None:
+    def add(self, effect: tuple, cause: tuple, m, scope=None):
+        space = self.matrix
+
+        if scope == "MG":
+            space = self.marginalizations
+
+        if self.get(effect=effect, cause=cause, scope=scope) is not None:
             return
 
-        if self.matrix.get(effect) is None:
-            self.matrix[effect] = {}
+        if space.get(effect) is None:
+            space[effect] = {}
 
-        self.matrix[effect][cause] = m
+        space[effect][cause] = m
 
 def find_insertion_pos(l, to_insert):
     for i, num in enumerate(l):
@@ -43,19 +54,30 @@ def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str,
     leftmost_target, *rightest = target_effect
     rightest = tuple(rightest)
 
-    diff_target_cause = list(set(base_cause).difference(target_cause))
+    base_cause_set = set(base_cause)
+    diff_target_cause = list(base_cause_set.difference(target_cause))
     diff_target_cause.sort()
 
     leftmost_row_index = get_binary_position(binary=binary_distribution)
-    leftmost_resultant = p_matrix[leftmost_row_index, [leftmost_target*2, (leftmost_target*2)+1]][np.newaxis, :]
+    leftmost_columns = [leftmost_target*2, (leftmost_target*2)+1]
+    leftmost_resultant = p_matrix[leftmost_row_index, leftmost_columns][np.newaxis, :]
 
     if len(diff_target_cause) > 0:
         memoized_left_matrix = memo.get((leftmost_target,), target_cause)
         if memoized_left_matrix:
             leftmost_resultant = memoized_left_matrix
         else:
-            leftmost_resultant = marginalize(matrix=leftmost_resultant, tensors=len(base_cause), positions=diff_target_cause, axis=1)
-            memo.add((leftmost_target,), target_cause, leftmost_resultant)
+            lefmost_marginalized = recursive_marginalization(
+                matrix=p_matrix[:, leftmost_columns],
+                tensors=len(base_cause),
+                positions=diff_target_cause,
+                axis=1,
+            )
+
+            memo.add(target_effect, target_cause, lefmost_marginalized, scope="MG")
+
+            leftmost_row_index = get_binary_position(binary=binary_distribution, mask=target_cause)
+            leftmost_resultant = lefmost_marginalized[leftmost_row_index, [0, 1]][np.newaxis, :]
 
     rightest_resultant = get_probability_distribution(
         p_matrix=p_matrix,
@@ -78,6 +100,6 @@ def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str,
 
     r = product_tensor_with_cut(concatenated_matrix, row_index, cut=cut, left_side_exp=insert_position)
 
-    memo.add(target_effect, target_cause, r)
+    memo.add(target_effect, target_cause, r) # memoize resultant
 
     return r

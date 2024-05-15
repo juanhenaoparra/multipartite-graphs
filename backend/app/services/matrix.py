@@ -3,11 +3,11 @@ import numpy as np
 import math
 
 def get_binary_position(binary: str, mask=None, unmask=None):
-    if mask:
+    if mask is not None:
         binary = "".join([binary[i] for i in range(len(binary)) if i in mask])
         if binary == "":
             return 0
-    elif unmask:
+    elif unmask is not None:
         binary = "".join([binary[i] for i in range(len(binary)) if i not in unmask])
         if binary == "":
             return 0
@@ -162,3 +162,16 @@ def marginalize(matrix: np.ndarray, tensors: int, positions: list, axis: int):
         counter += 1
 
     return new_matrix
+
+def recursive_marginalization(matrix: np.ndarray, tensors: int, positions: list, axis: int):
+    left, *rights = positions
+
+    matrix = marginalize(matrix=matrix, tensors=tensors, positions=[left], axis=axis)
+    # TODO: add memoization
+
+    if rights is None or len(rights) == 0:
+        return matrix
+
+    decreased_rights = [x-1 for x in rights]
+
+    return recursive_marginalization(matrix=matrix, tensors=tensors-1, positions=decreased_rights, axis=axis)
