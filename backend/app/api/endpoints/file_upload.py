@@ -46,3 +46,12 @@ async def create_random_graph(graph_input: gen_schema.GenGraphInput, db: Session
 @router.get("/bipartite/{graph_name}", response_model=bipartite_schema.BipartiteMatchResponse)
 async def check_bipartiteness(graph_name: str, db: Session = Depends(get_db)):
     return process_controller.check_bipartiteness(db, graph_name)
+
+@router.post("/bipartite/minimum-partition/e1")
+async def calculate_partition_distance(partition_input: bipartite_schema.SystemPartitionInput, db: Session = Depends(get_db)):
+    return process_controller.calculate_partition_distance(
+        db=db,
+        full_system=partition_input.full_system,
+        matrix=partition_input.matrix,
+        binary_distribution=partition_input.binary_distribution,
+    )
