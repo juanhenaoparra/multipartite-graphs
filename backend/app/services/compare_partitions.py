@@ -73,7 +73,7 @@ def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str,
         return None
 
     memoized_matrix = memo.get(target_effect, target_cause)
-    if memoized_matrix:
+    if memoized_matrix is not None:
         return memoized_matrix
 
     leftmost_target, *rightest = target_effect
@@ -166,19 +166,19 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
         MinimumPartitionResponse: The minimum partition of the system with its details
     """
     memo = Memo(binary_distribution=binary_distribution)
-    partitions = gen_system_partitions(full_system)
-    base_effect = tuple(full_system[0])
-    base_cause = tuple(full_system[1])
+    partitions = gen_system_partitions(matrix)
+    base_effect = tuple(matrix[0])
+    base_cause = tuple(matrix[1])
 
-    matrix = np.array(matrix)
+    full_system = np.array(full_system)
 
-    original_distribution = get_probability_distribution(p_matrix=matrix, binary_distribution=binary_distribution, target_effect=base_effect, target_cause=base_cause, base_cause=base_cause, memo=memo)
+    original_distribution = get_probability_distribution(p_matrix=full_system, binary_distribution=binary_distribution, target_effect=base_effect, target_cause=base_cause, base_cause=base_cause, memo=memo)
 
     min_distance = float("inf")
     min_partition = None
 
     for partition in partitions:
-        distance = calculate_partition_distance(matrix, original_distribution, binary_distribution, base_cause, partition, memo)
+        distance = calculate_partition_distance(full_system, original_distribution, binary_distribution, base_cause, partition, memo)
         absolute_distance = abs(distance)
 
         if absolute_distance < min_distance:

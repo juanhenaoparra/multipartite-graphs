@@ -30,6 +30,6 @@ class BipartiteMatchResponse(BaseModel):
         return max(self.connectedComponents.keys())
 
 class SystemPartitionInput(BaseModel):
-    full_system: List[List[int]]
+    full_system: List[List[float]]
     matrix: List[List[int]]
     binary_distribution: str
