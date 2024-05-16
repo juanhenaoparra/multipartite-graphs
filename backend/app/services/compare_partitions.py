@@ -149,7 +149,7 @@ def calculate_partition_distance(matrix: np.ndarray, original: np.ndarray, binar
     partition_b = get_probability_distribution(p_matrix=matrix, binary_distribution=binary_distribution, target_effect=partitions[2], target_cause=partitions[3], base_cause=base_cause, memo=memo)
 
     partition_joined = np.concatenate([partition_a, partition_b], axis=1)
-    partition_joined_m = product_tensor_with_cut(partition_joined, 0, partition_a.shape[1], partitions[1])
+    partition_joined_m = product_tensor_with_cut(partition_joined, 0, partition_a.shape[1], partitions[0])
 
     return get_emd(original[0], partition_joined_m[0])
 
@@ -178,11 +178,16 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
     min_partition = None
 
     for partition in partitions:
-        distance = calculate_partition_distance(full_system, original_distribution, binary_distribution, base_cause, partition, memo)
-        absolute_distance = abs(distance)
+        print("Calculating partition distance of:", partition)
+        try:
+          distance = calculate_partition_distance(full_system, original_distribution, binary_distribution, base_cause, partition, memo)
+          absolute_distance = abs(distance)
 
-        if absolute_distance < min_distance:
-            min_distance = absolute_distance
-            min_partition = partition
+          if absolute_distance < min_distance:
+              min_distance = absolute_distance
+              min_partition = partition
+        except Exception as e:
+            print("-> Error calculating partition distance:", e)
+            continue
 
     return MinimumPartitionResponse(binary_distribution=binary_distribution, partition=min_partition, distance=min_distance)
