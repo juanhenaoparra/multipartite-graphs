@@ -46,6 +46,8 @@ def generateBipartiteGraph(presentNodesCount: int, futureNodesCount: int) -> Dic
                 weight=weight
             ))
 
+            adjacencyList[fNode] = []
+
     return adjacencyList
 
 def generateGraphComplete(nodesNumber: int, isWeighted: bool = False) -> Dict[str, List[AdjacencyNode]]:
@@ -179,7 +181,6 @@ def GenerateGraph(genInput: GenGraphInput):
             presentNodesCount =genInput.presentNodesCount,
             futureNodesCount = genInput.futureNodesCount
         )
-    
 
     return generateGraphRandom(
         nodesNumber=genInput.nodesNumber,
