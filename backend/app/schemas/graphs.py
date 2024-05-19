@@ -67,7 +67,7 @@ class GraphNode(BaseModel):
                 self.linkedTo.remove(edge)
                 return True
         return False
-    
+
 class GraphSchema(BaseModel):
     name: str
     data: List[GraphNode]
@@ -81,7 +81,7 @@ class GraphSchema(BaseModel):
 
     def get_children(self, nodeId: str) -> List[GraphNode]:
         return [self._nodesMap.get(edge.nodeId) for edge in self._nodesMap.get(nodeId).linkedTo]
-    
+
     def update_edge_weight(self, from_node_id: str, to_node_id: str, new_weight: float) -> bool:
         from_node = self.get_node_by_id(from_node_id)
         if from_node:
