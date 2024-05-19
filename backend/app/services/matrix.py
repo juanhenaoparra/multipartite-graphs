@@ -1,28 +1,47 @@
 import numpy as np
 import math
 
+def str_bin(number: int | float, size: int):
+    return f'{number:0{size}b}'
+
+def hamming_distance(a, b):
+    return bin(a^b).count('1')
+
 def get_emd(a, b):
-    """
-    Calculate the Earth Mover's Distance between two sets of points.
-    EMD being defined by:
-    EMD0 = 0
-    EMDi+1 = (Ai+EMDi) - Bi
-    """
-    n = max(len(a), len(b))
+    len_a = math.log2(len(a))
+    len_b = math.log2(len(b))
+    max_len = int(max(len_a, len_b))
+    le_keys = gen_little_endian_range(max_len)
 
-    if len(a) < n:
-        a += [0] * (n - len(a))
-    elif len(b) < n:
-        b += [0] * (n - len(b))
+    total = 0
+    a_sorter = np.argsort(a)
 
-    d = np.zeros(n+1, dtype=np.float128)
-    d_sum = 0
+    while a[a_sorter[-1]] != 0:
+        dB = {
+            le_keys.index(str_bin(i, max_len)): e
+            for i, e in enumerate(b)
+            if e > 0
+        }
 
-    for i in range(1, n+1):
-        d[i] = (a[i-1] + d[i-1]) - b[i-1]
-        d_sum += d[i]
+        le_A_key: int = int(le_keys[a_sorter[-1]], 2)
 
-    return d_sum
+        all_b_keys = {
+            k: hamming_distance(k, le_A_key)
+            for k, v in dB.items()
+        }
+
+        minimum = min(all_b_keys, key=all_b_keys.get)
+        b_key = le_keys.index(str_bin(minimum, max_len))
+
+        restar = min(a[a_sorter[-1]], b[b_key])
+        a[a_sorter[-1]] -= restar
+        b[b_key] -= restar
+
+        total += restar * all_b_keys[minimum]
+
+        a_sorter = np.argsort(a)
+
+    return total
 
 def get_binary_position(binary: str, mask=None, unmask=None):
     if mask is not None:
