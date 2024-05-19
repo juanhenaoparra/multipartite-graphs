@@ -36,6 +36,13 @@ def get_binary_position(binary: str, mask=None, unmask=None):
 
     return int(binary[::-1], 2)
 
+def mask_binary(binary: str, mask = None, unmask = None):
+    if mask is not None:
+        return "".join([binary[i] for i in range(len(binary)) if i in mask])
+
+    if unmask is not None:
+        return "".join([binary[i] for i in range(len(binary)) if i not in unmask])
+
 def product_tensor_with_cut(matrix: np.ndarray, row: int, cut: int, left_side_exp: list[int]):
     """
     Do product tensor of a matrix given a cut column. The cut column is the column where the matrix will be divided.
@@ -137,3 +144,29 @@ def recursive_marginalization(matrix: np.ndarray, tensors: int, positions: list,
     decreased_rights = [x-1 for x in rights]
 
     return recursive_marginalization(matrix=matrix, tensors=tensors-1, positions=decreased_rights, axis=axis)
+
+def gen_little_endian_range(n: int):
+    return [bin(i)[2:].zfill(n)[::-1] for i in range(2**n)]
+
+def expand_matrix(matrix: np.ndarray, tensors: int, positions: list, axis: int = 0):
+    m, n = matrix.shape
+
+    matrix_dict = {}
+    for v in range(m if axis == 0 else n):
+        values = matrix[v] if axis == 0 else matrix[:, v]
+        matrix_dict[bin(v)[2:].zfill(tensors)[::-1]] = values
+
+    expected_positions = gen_little_endian_range(tensors+len(positions))
+
+    new_shape = (len(expected_positions), n) if axis == 0 else (m, len(expected_positions))
+    new_m = np.zeros(new_shape)
+
+    for pos in expected_positions:
+        index = get_binary_position(pos)
+        remaining_binaries = mask_binary(pos, unmask=positions)
+        if axis == 0:
+            new_m[index] = matrix_dict[remaining_binaries]
+        else:
+            new_m[:, index] = matrix_dict[remaining_binaries]
+
+    return new_m
