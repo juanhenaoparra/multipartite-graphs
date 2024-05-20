@@ -213,4 +213,6 @@ def TransformToGraphSchema(adjacencyList: Dict[str, List[AdjacencyNode]]) -> Gra
                 weight=neighbor.weight if neighbor.weight else None
             ))
 
+    g.set_nodes_map()
+
     return g

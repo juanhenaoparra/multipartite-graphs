@@ -7,7 +7,10 @@ def str_bin(number: int | float, size: int):
 def hamming_distance(a, b):
     return bin(a^b).count('1')
 
-def get_emd(a, b):
+def get_emd(_a, _b):
+    a = _a.copy()
+    b = _b.copy()
+
     len_a = math.log2(len(a))
     len_b = math.log2(len(b))
     max_len = int(max(len_a, len_b))
@@ -61,6 +64,40 @@ def mask_binary(binary: str, mask = None, unmask = None):
 
     if unmask is not None:
         return "".join([binary[i] for i in range(len(binary)) if i not in unmask])
+
+def product_tensor(matrix: np.ndarray, row: int = None):
+    """
+    Do product tensor of a matrix.
+    """
+    m = matrix.shape[0]
+    n = matrix.shape[1]
+    components = int(n/2)
+    columns = 2**components
+
+    rows = m if row is None else 1
+
+    m_tensor = np.full((rows, columns), np.nan)
+    binary_values_j = {}
+
+    for i in range(m_tensor.shape[0]):
+        i_matrix = i
+        if row is not None:
+            i_matrix = row
+
+        for j in range(m_tensor.shape[1]):
+            if j not in binary_values_j:
+                binary_values_j[j] = bin(j)[2:].zfill(components)
+
+            positions = [(2*(components-(x+1)) + int(y)) if x < components-1 else int(y) for x, y in enumerate(binary_values_j[j])]
+
+            cell_product = 1
+
+            for k in positions:
+                cell_product *= matrix[i_matrix][k]
+
+            m_tensor[i][j] = cell_product
+
+    return m_tensor
 
 def product_tensor_with_cut(matrix: np.ndarray, row: int, cut: int, left_side_exp: list[int]):
     """

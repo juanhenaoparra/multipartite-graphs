@@ -59,7 +59,8 @@ class GraphNode(BaseModel):
             if edge.nodeId == to_node_id:
                 edge.weight = new_weight
                 return True
-        return False
+
+        raise Exception("Edge not found")
 
     def remove_edge_by_node_id(self, to_node_id: str) -> bool:
         for edge in self.linkedTo:
@@ -79,17 +80,29 @@ class GraphSchema(BaseModel):
     def get_node_by_id(self, nodeId: str) -> Optional[GraphNode]:
         return self._nodesMap.get(nodeId)
 
-    def get_children(self, nodeId: str) -> List[GraphNode]:
-        return [self._nodesMap.get(edge.nodeId) for edge in self._nodesMap.get(nodeId).linkedTo]
+    def get_children(self, nodeId: str, exclude_zero_weights = False) -> List[GraphNode]:
+        if not exclude_zero_weights:
+            return [self._nodesMap.get(edge.nodeId) for edge in self._nodesMap.get(nodeId).linkedTo]
+
+        return [self._nodesMap.get(edge.nodeId) for edge in self._nodesMap.get(nodeId).linkedTo if edge.weight != 0.0]
 
     def update_edge_weight(self, from_node_id: str, to_node_id: str, new_weight: float) -> bool:
         from_node = self.get_node_by_id(from_node_id)
         if from_node:
             return from_node.update_edge_weight(to_node_id, new_weight)
-        return False
+        raise Exception("Node not found")
 
     def remove_edge(self, from_node_id: str, to_node_id: str) -> bool:
         from_node = self.get_node_by_id(from_node_id)
         if from_node:
             return from_node.remove_edge_by_node_id(to_node_id)
         return False
+
+    def get_nodes_pointing_to(self, node_id: str) -> List[GraphNode]:
+        subscriptors = []
+
+        for n in self.data:
+            if n.has_child(node_id=node_id):
+                subscriptors.append(n)
+
+        return subscriptors
