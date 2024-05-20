@@ -36,8 +36,8 @@ class CheckBipartite:
             if node.id in self.colored: # skip already colored nodes
                 continue
 
-            children = self.g.get_children(node.id, exclude_zero_weights=self.exclude_zero_weights)
-            if (children is None or len(children) == 0) and (self.g.get_nodes_pointing_to(node.id) == 0): # set first color to isolated nodes
+            children = self.g.get_in_out_neighbors([node.id], exclude_zero_weights=self.exclude_zero_weights)
+            if children is None or len(children) == 0: # set first color to isolated nodes
                 self.set_color(node.id, 0)
                 res.add_node_to_group(node.id, nodeGroup)
                 continue
@@ -50,7 +50,7 @@ class CheckBipartite:
                 v = queue.pop()
                 oppositeColor = 1 - self.colored[v.id]
 
-                for child in self.g.get_children(v.id, exclude_zero_weights=self.exclude_zero_weights):
+                for child in self.g.get_in_out_neighbors([v.id], exclude_zero_weights=self.exclude_zero_weights):
                     childrenToAdd.add(child.id)
                     auxGroup = res.get_node_group(child.id)
                     if auxGroup != -1: # change group if any child already belongs to a group
