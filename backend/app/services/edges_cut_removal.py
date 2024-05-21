@@ -1,6 +1,8 @@
 import numpy as np
-from app.schemas.graphs import GraphSchema
 from app.services.matching import CheckBipartite
+from app.schemas.graphs import GraphSchema
+from app.schemas.generation import GenGraphInput
+from app.services.gen_graph import GenerateGraph, TransformToGraphSchema, generateNodeLabels
 from .matrix import get_binary_position, product_tensor, recursive_marginalization, expand_matrix, get_emd
 
 
@@ -9,7 +11,7 @@ class EdgeRemovalResult:
     expanded_matrix = None
     vector_resultant = None
     cost = None
-    connected_components = -1
+    connected_components = None
 
     def __init__(self, new_matrix, expanded_matrix, vector_resultant):
         self.new_matrix: np.ndarray = new_matrix
@@ -87,7 +89,7 @@ def evaluate_edge_removal(g: GraphSchema, labels: dict, p_matrix: np.ndarray, or
     bip.exclude_zero_weights = True
     check_bipartite_res = bip.process()
 
-    removal_result.connected_components = len(check_bipartite_res.connectedComponents)
+    removal_result.connected_components = check_bipartite_res.connectedComponents
 
     if removal_result.cost == 0.0:
         return removal_result
@@ -100,3 +102,56 @@ def evaluate_edge_removal(g: GraphSchema, labels: dict, p_matrix: np.ndarray, or
         )
 
     return removal_result
+
+def calculate_edges_costs(p_matrix: np.ndarray, binary_distribution: str, presentNodesCount: int, futureNodesCount: int, base_effect: tuple, base_cause: tuple):
+    original_distribution = product_tensor(p_matrix, row=get_binary_position(binary=binary_distribution))
+
+    g_dict = GenerateGraph(
+      GenGraphInput(
+        nodesNumber=presentNodesCount+futureNodesCount,
+        isBipartite=True,
+        presentNodesCount=presentNodesCount,
+        futureNodesCount=futureNodesCount,
+      )
+    )
+
+    all_labels = generateNodeLabels(futureNodesCount)
+    labels = {
+      "effects": {i: l+"'" for i, l in enumerate(all_labels) },
+      "causes": {i: l for i, l in enumerate(all_labels) }
+    }
+
+    anti_labels = {
+      "effects": {l+"'": i for i, l in enumerate(all_labels) },
+      "causes": {l: i for i, l in enumerate(all_labels) }
+    }
+
+    g = TransformToGraphSchema(g_dict)
+
+    p_m = p_matrix.copy()
+
+    class MinCut:
+        cost = float('inf')
+        connected_components = None
+        graph = None
+
+    min_cut: MinCut = MinCut()
+
+    for effect in range(3):
+        subscriptors = g.get_nodes_pointing_to(labels["effects"][effect])
+        subscriptors.sort(key=lambda n: n.label)
+
+        for sub in subscriptors:
+            cause_node_int = anti_labels["causes"][sub.label]
+            target_cause = tuple(i for i in range(3) if i != cause_node_int)
+
+            res = evaluate_edge_removal(g, labels, p_m, original_distribution, binary_distribution, effect, target_cause, base_effect, base_cause)
+
+            if res.cost == 0:
+                p_m = res.new_matrix # replace the matrix with the modified matrix if the cost is 0
+
+            if len(res.connected_components) == 2 and res.cost < min_cut.cost:
+                min_cut.cost = res.cost
+                min_cut.connected_components = res.connected_components
+
+    return [g, min_cut]
