@@ -1,28 +1,50 @@
 import numpy as np
 import math
 
-def get_emd(a, b):
-    """
-    Calculate the Earth Mover's Distance between two sets of points.
-    EMD being defined by:
-    EMD0 = 0
-    EMDi+1 = (Ai+EMDi) - Bi
-    """
-    n = max(len(a), len(b))
+def str_bin(number: int | float, size: int):
+    return f'{number:0{size}b}'
 
-    if len(a) < n:
-        a += [0] * (n - len(a))
-    elif len(b) < n:
-        b += [0] * (n - len(b))
+def hamming_distance(a, b):
+    return bin(a^b).count('1')
 
-    d = np.zeros(n+1, dtype=np.float128)
-    d_sum = 0
+def get_emd(_a, _b):
+    a = _a.copy()
+    b = _b.copy()
 
-    for i in range(1, n+1):
-        d[i] = (a[i-1] + d[i-1]) - b[i-1]
-        d_sum += d[i]
+    len_a = math.log2(len(a))
+    len_b = math.log2(len(b))
+    max_len = int(max(len_a, len_b))
+    le_keys = gen_little_endian_range(max_len)
 
-    return d_sum
+    total = 0
+    a_sorter = np.argsort(a)
+
+    while a[a_sorter[-1]] != 0:
+        dB = {
+            le_keys.index(str_bin(i, max_len)): e
+            for i, e in enumerate(b)
+            if e > 0
+        }
+
+        le_A_key: int = int(le_keys[a_sorter[-1]], 2)
+
+        all_b_keys = {
+            k: hamming_distance(k, le_A_key)
+            for k, v in dB.items()
+        }
+
+        minimum = min(all_b_keys, key=all_b_keys.get)
+        b_key = le_keys.index(str_bin(minimum, max_len))
+
+        restar = min(a[a_sorter[-1]], b[b_key])
+        a[a_sorter[-1]] -= restar
+        b[b_key] -= restar
+
+        total += restar * all_b_keys[minimum]
+
+        a_sorter = np.argsort(a)
+
+    return total
 
 def get_binary_position(binary: str, mask=None, unmask=None):
     if mask is not None:
@@ -35,6 +57,47 @@ def get_binary_position(binary: str, mask=None, unmask=None):
             return 0
 
     return int(binary[::-1], 2)
+
+def mask_binary(binary: str, mask = None, unmask = None):
+    if mask is not None:
+        return "".join([binary[i] for i in range(len(binary)) if i in mask])
+
+    if unmask is not None:
+        return "".join([binary[i] for i in range(len(binary)) if i not in unmask])
+
+def product_tensor(matrix: np.ndarray, row: int = None):
+    """
+    Do product tensor of a matrix.
+    """
+    m = matrix.shape[0]
+    n = matrix.shape[1]
+    components = int(n/2)
+    columns = 2**components
+
+    rows = m if row is None else 1
+
+    m_tensor = np.full((rows, columns), np.nan)
+    binary_values_j = {}
+
+    for i in range(m_tensor.shape[0]):
+        i_matrix = i
+        if row is not None:
+            i_matrix = row
+
+        for j in range(m_tensor.shape[1]):
+            if j not in binary_values_j:
+                binary_values_j[j] = bin(j)[2:].zfill(components)
+
+            positions = [(2*(components-(x+1)) + int(y)) if x < components-1 else int(y) for x, y in enumerate(binary_values_j[j])]
+
+            cell_product = 1
+
+            for k in positions:
+                cell_product *= matrix[i_matrix][k]
+
+            m_tensor[i][j] = cell_product
+
+    return m_tensor
 
 def product_tensor_with_cut(matrix: np.ndarray, row: int, cut: int, left_side_exp: list[int]):
     """
@@ -137,3 +200,29 @@ def recursive_marginalization(matrix: np.ndarray, tensors: int, positions: list,
     decreased_rights = [x-1 for x in rights]
 
     return recursive_marginalization(matrix=matrix, tensors=tensors-1, positions=decreased_rights, axis=axis)
+
+def gen_little_endian_range(n: int):
+    return [bin(i)[2:].zfill(n)[::-1] for i in range(2**n)]
+
+def expand_matrix(matrix: np.ndarray, tensors: int, positions: list, axis: int = 0):
+    m, n = matrix.shape
+
+    matrix_dict = {}
+    for v in range(m if axis == 0 else n):
+        values = matrix[v] if axis == 0 else matrix[:, v]
+        matrix_dict[bin(v)[2:].zfill(tensors)[::-1]] = values
+
+    expected_positions = gen_little_endian_range(tensors+len(positions))
+
+    new_shape = (len(expected_positions), n) if axis == 0 else (m, len(expected_positions))
+    new_m = np.zeros(new_shape)
+
+    for pos in expected_positions:
+        index = get_binary_position(pos)
+        remaining_binaries = mask_binary(pos, unmask=positions)
+        if axis == 0:
+            new_m[index] = matrix_dict[remaining_binaries]
+        else:
+            new_m[:, index] = matrix_dict[remaining_binaries]
+
+    return new_m

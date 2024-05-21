@@ -7,6 +7,48 @@ from app.services.ids import GenRandomHex
 
 DEFAULT_WEIGHT_START = 0.0
 DEFAULT_WEIGHT_END = 1.0
+INFINITE_WEIGHT = float('inf')
+MATCHING_WEIGHT = -1
+
+def generateNodeLabels(numNodes: int) -> List[str]:
+    """
+    Generate a list of node labels from 'A' onwards for the given number of nodes.
+    """
+    labels = []
+    for i in range(numNodes):
+        labels.append(chr(65 + i))  # 65 is the ASCII value for 'A'
+    return labels
+
+def generateBipartiteGraph(presentNodesCount: int, futureNodesCount: int) -> Dict[str, List[AdjacencyNode]]:
+    """
+    Generate a bipartite graph with the given number of present and future nodes.
+    All edges have infinite weight except when connecting corresponding present to future nodes,
+    which have a weight of -1.
+    If the number of present nodes equals the number of future nodes, no edge is created
+    between corresponding present and future nodes.
+    """
+    presentNodes = generateNodeLabels(presentNodesCount)
+    futureNodes = [label + "'" for label in generateNodeLabels(futureNodesCount)]
+
+    adjacencyList: Dict[str, List[AdjacencyNode]] = {}
+
+    for pNode in presentNodes:
+        if pNode not in adjacencyList:
+            adjacencyList[pNode] = []
+
+        for fNode in futureNodes:
+            if pNode + "'" == fNode:
+                continue  # Skip creating an edge between corresponding nodes
+            weight = MATCHING_WEIGHT if pNode + "'" == fNode else INFINITE_WEIGHT
+            adjacencyList[pNode].append(AdjacencyNode(
+                id=fNode,
+                parentId=pNode,
+                weight=weight
+            ))
+
+            adjacencyList[fNode] = []
+
+    return adjacencyList
 
 def generateGraphComplete(nodesNumber: int, isWeighted: bool = False) -> Dict[str, List[AdjacencyNode]]:
     """
@@ -30,6 +72,8 @@ def generateGraphComplete(nodesNumber: int, isWeighted: bool = False) -> Dict[st
                 weight=GetRandomWithPrecision(DEFAULT_WEIGHT_START, DEFAULT_WEIGHT_END) if isWeighted else None))
 
     return adjacencyList
+
+
 
 def generateGraphConnected(nodesNumber: int, degree: int, rewireProbability: float, isWeighted: bool = False) -> Dict[str, List[AdjacencyNode]]:
     """"
@@ -132,6 +176,11 @@ def GenerateGraph(genInput: GenGraphInput):
             rewireProbability=genInput.probability,
             degree=genInput.degree,
             isWeighted=genInput.weighted,)
+    if genInput.isBipartite:
+        return  generateBipartiteGraph(
+            presentNodesCount =genInput.presentNodesCount,
+            futureNodesCount = genInput.futureNodesCount
+        )
 
     return generateGraphRandom(
         nodesNumber=genInput.nodesNumber,
@@ -163,5 +212,7 @@ def TransformToGraphSchema(adjacencyList: Dict[str, List[AdjacencyNode]]) -> Gra
                 nodeId=neighbor.id,
                 weight=neighbor.weight if neighbor.weight else None
             ))
+
+    g.set_nodes_map()
 
     return g

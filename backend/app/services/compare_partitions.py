@@ -69,7 +69,7 @@ def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str,
     Returns:
         np.ndarray: The probability distribution of the target effect given the target cause and the base cause.
     """
-    if not target_effect or len(target_effect) == 0:
+    if not target_effect:
         return None
 
     memoized_matrix = memo.get(target_effect, target_cause)
