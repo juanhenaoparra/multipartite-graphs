@@ -44,6 +44,8 @@ class MinimumPartitionResponse(BaseModel):
     binary_distribution: str
     partition: list
     distance: float
+    original_distribution: list = None
+    min_cut_distribution: list = None
     stats: dict = {
       "elapsed_time_secs": 0.0
     }
@@ -156,7 +158,7 @@ def calculate_partition_distance(matrix: np.ndarray, original: np.ndarray, binar
     partition_joined = np.concatenate([partition_a, partition_b], axis=1)
     partition_joined_m = product_tensor_with_cut(partition_joined, 0, partition_a.shape[1], partitions[0])
 
-    return get_emd(original[0], partition_joined_m[0])
+    return get_emd(original[0], partition_joined_m[0]), partition_joined_m[0]
 
 def calculate_minimum_partition(full_system: list, matrix, binary_distribution: str) -> MinimumPartitionResponse:
     """
@@ -181,16 +183,18 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
 
     min_distance = float("inf")
     min_partition = None
+    min_distribution = None
 
     for partition in partitions:
         # print("Calculating partition distance of:", partition)
         try:
-          distance = calculate_partition_distance(full_system, original_distribution, binary_distribution, base_cause, partition, memo)
+          distance, dist = calculate_partition_distance(full_system, original_distribution, binary_distribution, base_cause, partition, memo)
           absolute_distance = abs(distance)
 
           if absolute_distance < min_distance:
               min_distance = absolute_distance
               min_partition = partition
+              min_distribution = dist
         except Exception as e:
             # print("-> Error calculating partition distance:", e)
             continue
@@ -200,5 +204,9 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
     res.stats["memoized_matrices"] = len(memo.matrix)
     res.stats["memoized_marginalizations"] = len(memo.marginalizations)
     res.stats["total_saved_matrix_calculations"] = memo.used_count
+
+    res.original_distribution = original_distribution[0].tolist()
+    if min_distribution is not None:
+        res.min_cut_distribution = min_distribution.tolist()
 
     return res
