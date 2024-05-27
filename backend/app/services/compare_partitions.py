@@ -8,6 +8,7 @@ class Memo(BaseModel):
     binary_distribution: str = ""
     matrix: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
     marginalizations: Dict[Tuple, Dict[Tuple, np.ndarray]] = {}
+    used_count: int = 0
 
     class Config:
         arbitrary_types_allowed = True
@@ -20,6 +21,7 @@ class Memo(BaseModel):
 
         try:
             m = space[effect][cause]
+            self.used_count += 1
             return m
         except:
             return None
@@ -42,6 +44,9 @@ class MinimumPartitionResponse(BaseModel):
     binary_distribution: str
     partition: list
     distance: float
+    stats: dict = {
+      "elapsed_time_secs": 0.0
+    }
 
 def find_insertion_pos(l, to_insert):
     for i, num in enumerate(l):
@@ -89,7 +94,7 @@ def get_probability_distribution(p_matrix: np.ndarray, binary_distribution: str,
 
     if len(diff_target_cause) > 0:
         memoized_left_matrix = memo.get((leftmost_target,), target_cause)
-        if memoized_left_matrix:
+        if memoized_left_matrix is not None:
             leftmost_resultant = memoized_left_matrix
         else:
             lefmost_marginalized = recursive_marginalization(
@@ -178,7 +183,7 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
     min_partition = None
 
     for partition in partitions:
-        print("Calculating partition distance of:", partition)
+        # print("Calculating partition distance of:", partition)
         try:
           distance = calculate_partition_distance(full_system, original_distribution, binary_distribution, base_cause, partition, memo)
           absolute_distance = abs(distance)
@@ -187,7 +192,13 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
               min_distance = absolute_distance
               min_partition = partition
         except Exception as e:
-            print("-> Error calculating partition distance:", e)
+            # print("-> Error calculating partition distance:", e)
             continue
 
-    return MinimumPartitionResponse(binary_distribution=binary_distribution, partition=min_partition, distance=min_distance)
+    res = MinimumPartitionResponse(binary_distribution=binary_distribution, partition=min_partition, distance=min_distance)
+
+    res.stats["memoized_matrices"] = len(memo.matrix)
+    res.stats["memoized_marginalizations"] = len(memo.marginalizations)
+    res.stats["total_saved_matrix_calculations"] = memo.used_count
+
+    return res

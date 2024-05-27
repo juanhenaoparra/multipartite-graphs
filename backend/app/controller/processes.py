@@ -1,3 +1,4 @@
+import datetime
 from fastapi import HTTPException
 
 import ast
@@ -30,8 +31,14 @@ def check_bipartiteness(db: Session, graph_name: str) -> BipartiteMatchResponse:
         db.refresh(graph)
 
 def calculate_partition_distance(db: Session, full_system, matrix, binary_distribution) -> float:
-    return calculate_minimum_partition(
+    start_date = datetime.datetime.now()
+
+    res = calculate_minimum_partition(
         full_system=full_system,
         matrix=matrix,
         binary_distribution=binary_distribution,
     )
+
+    res.stats["elapsed_time_secs"] = (datetime.datetime.now() - start_date).total_seconds()
+
+    return res
