@@ -1,6 +1,6 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional, Any
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from .matrix import get_binary_position, product_tensor_with_cut, recursive_marginalization, get_emd
 from .partitions_generator import gen_system_partitions
 
@@ -41,14 +41,12 @@ class Memo(BaseModel):
         space[effect][cause] = m
 
 class MinimumPartitionResponse(BaseModel):
-    binary_distribution: str
-    partition: list
-    distance: float
-    original_distribution: list = None
-    min_cut_distribution: list = None
-    stats: dict = {
-      "elapsed_time_secs": 0.0
-    }
+    binary_distribution: Optional[str] = None
+    partition: Optional[Any] = None
+    distance: Optional[float] = None
+    original_distribution: Optional[list] = None
+    min_cut_distribution: Optional[list] = None
+    stats: Optional[dict] = Field(default={ "elapsed_time_secs": 0.0 })
 
 def find_insertion_pos(l, to_insert):
     for i, num in enumerate(l):

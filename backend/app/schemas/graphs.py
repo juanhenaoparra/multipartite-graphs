@@ -60,7 +60,7 @@ class GraphNode(BaseModel):
                 edge.weight = new_weight
                 return True
 
-        raise Exception("Edge not found")
+        raise Exception("Edge not found: " + self.id + " -> " + to_node_id, "Weight: " + str(new_weight))
 
     def remove_edge_by_node_id(self, to_node_id: str) -> bool:
         for edge in self.linkedTo:
@@ -112,7 +112,7 @@ class GraphSchema(BaseModel):
         from_node = self.get_node_by_id(from_node_id)
         if from_node:
             return from_node.update_edge_weight(to_node_id, new_weight)
-        raise Exception("Node not found")
+        raise Exception("Node not found. "+from_node_id+" -> "+to_node_id+" Weight: "+str(new_weight))
 
     def remove_edge(self, from_node_id: str, to_node_id: str) -> bool:
         from_node = self.get_node_by_id(from_node_id)
