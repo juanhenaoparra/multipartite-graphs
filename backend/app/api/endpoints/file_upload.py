@@ -55,3 +55,12 @@ async def calculate_partition_distance(partition_input: bipartite_schema.SystemP
         matrix=partition_input.matrix,
         binary_distribution=partition_input.binary_distribution,
     )
+
+@router.post("/bipartite/minimum-partition/e2")
+async def calculate_partition_distance_v2(partition_input: bipartite_schema.SystemPartitionInput, db: Session = Depends(get_db)):
+    return process_controller.calculate_edges_cut_distance(
+        db=db,
+        full_system=partition_input.full_system,
+        matrix=partition_input.matrix,
+        binary_distribution=partition_input.binary_distribution,
+    )
