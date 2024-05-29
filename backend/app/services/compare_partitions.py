@@ -194,7 +194,7 @@ def calculate_minimum_partition(full_system: list, matrix, binary_distribution: 
               min_partition = partition
               min_distribution = dist
         except Exception as e:
-            # print("-> Error calculating partition distance:", e)
+            # print("-> Error calculating partition distance:", e, partition)
             continue
 
     res = MinimumPartitionResponse(binary_distribution=binary_distribution, partition=min_partition, distance=min_distance)

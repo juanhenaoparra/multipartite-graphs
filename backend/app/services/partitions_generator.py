@@ -25,18 +25,19 @@ def cartesian_product(a, b, len_a, len_b, include_negative_set=False, m=None):
       list: A list containing all possible combinations (ordered pairs) from the Cartesian product of `a` and `b`.
   """
   prod = []
-  items_pushed = set()
+  items_pushed_a = set()
+  items_pushed_b = set()
 
   for i in range(len(a)):
       for j in range(len(b)):
-          if len(a[i]) == 1 and str(a[i]) not in items_pushed:
+          if len(a[i]) == 1 and str(a[i]) not in items_pushed_a:
               neg_a, neg_b = calculate_negative_set(m, a[i], tuple())
               prod.append([a[i], tuple(), neg_a, neg_b])
-              items_pushed.add(str(a[i]))
-          if len(b[j]) == 1 and str(b[j]) not in items_pushed:
+              items_pushed_a.add(str(a[i]))
+          if len(b[j]) == 1 and str(b[j]) not in items_pushed_b:
               neg_a, neg_b = calculate_negative_set(m, tuple(), b[j])
               prod.append([tuple(), b[j], neg_a, neg_b])
-              items_pushed.add(str(b[j]))
+              items_pushed_b.add(str(b[j]))
 
           neg_a, neg_b = calculate_negative_set(m, a[i], b[j])
           prod.append([a[i], b[j], neg_a, neg_b])
