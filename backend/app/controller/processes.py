@@ -50,8 +50,8 @@ def calculate_edges_cut_distance(db: Session, full_system, matrix, binary_distri
     res = calculate_edges_cut(
         p_matrix=full_system,
         binary_distribution=binary_distribution,
-        presentNodesCount=len(matrix[0]),
-        futureNodesCount=len(matrix[1]),
+        futureNodesCount=len(matrix[0]),
+        presentNodesCount=len(matrix[1]),
         base_effect=tuple(matrix[0]),
         base_cause=tuple(matrix[1]),
     )

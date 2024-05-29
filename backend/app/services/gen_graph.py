@@ -37,8 +37,6 @@ def generateBipartiteGraph(presentNodesCount: int, futureNodesCount: int) -> Dic
             adjacencyList[pNode] = []
 
         for fNode in futureNodes:
-            if pNode + "'" == fNode:
-                continue  # Skip creating an edge between corresponding nodes
             weight = MATCHING_WEIGHT if pNode + "'" == fNode else INFINITE_WEIGHT
             adjacencyList[pNode].append(AdjacencyNode(
                 id=fNode,

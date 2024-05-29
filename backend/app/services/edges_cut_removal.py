@@ -122,15 +122,16 @@ def calculate_edges_costs(p_matrix: np.ndarray, binary_distribution: str, presen
       )
     )
 
-    all_labels = generateNodeLabels(futureNodesCount)
+    cause_labels = generateNodeLabels(presentNodesCount)
+    effect_labels = generateNodeLabels(futureNodesCount)
     labels = {
-      "effects": {i: l+"'" for i, l in enumerate(all_labels) },
-      "causes": {i: l for i, l in enumerate(all_labels) }
+      "effects": {i: l+"'" for i, l in enumerate(effect_labels) },
+      "causes": {i: l for i, l in enumerate(cause_labels) }
     }
 
     anti_labels = {
-      "effects": {l+"'": i for i, l in enumerate(all_labels) },
-      "causes": {l: i for i, l in enumerate(all_labels) }
+      "effects": {l+"'": i for i, l in enumerate(effect_labels) },
+      "causes": {l: i for i, l in enumerate(cause_labels) }
     }
 
     g = TransformToGraphSchema(g_dict)
