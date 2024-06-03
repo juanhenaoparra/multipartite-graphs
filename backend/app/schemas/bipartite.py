@@ -1,5 +1,4 @@
-from typing import List, Dict
-from app.schemas.graphs import GraphNode
+from typing import List, Dict, Optional
 from pydantic import BaseModel
 
 class BipartiteMatchResponse(BaseModel):
@@ -31,5 +30,5 @@ class BipartiteMatchResponse(BaseModel):
 
 class SystemPartitionInput(BaseModel):
     full_system: List[List[float]]
-    matrix: List[List[int]]
     binary_distribution: str
+    subsystem: Optional[List[List[int]]] = None

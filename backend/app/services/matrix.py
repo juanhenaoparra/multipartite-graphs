@@ -226,3 +226,22 @@ def expand_matrix(matrix: np.ndarray, tensors: int, positions: list, axis: int =
             new_m[:, index] = matrix_dict[remaining_binaries]
 
     return new_m
+
+def get_subsystem_distribution(matrix: np.ndarray, axis: int, effect: tuple, cause: tuple):
+    m,n = matrix.shape
+    new_m = np.zeros((2**len(cause), len(effect)*2))
+
+    tensors = math.log2(m) if axis == 1 else n/2
+    tensors = round(tensors)
+    full_pos = list(range(tensors))
+
+    to_delete = tuple([x for x in full_pos if x not in cause])
+
+    for c, i in enumerate(effect):
+        indexes = [2*i, 2*i+1]
+        cols = matrix[:,indexes]
+        if len(cause) != tensors:
+            cols = recursive_marginalization(matrix[:,indexes], tensors, to_delete, axis)
+        new_m[:,[2*c,2*c+1]] = cols
+
+    return new_m

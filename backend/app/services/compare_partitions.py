@@ -1,5 +1,6 @@
 from typing import Dict, Tuple, Optional, Any
 import numpy as np
+import math
 from pydantic import BaseModel, Field
 from .matrix import get_binary_position, product_tensor_with_cut, recursive_marginalization, get_emd
 from .partitions_generator import gen_system_partitions
@@ -158,24 +159,23 @@ def calculate_partition_distance(matrix: np.ndarray, original: np.ndarray, binar
 
     return get_emd(original[0], partition_joined_m[0]), partition_joined_m[0]
 
-def calculate_minimum_partition(full_system: list, matrix, binary_distribution: str) -> MinimumPartitionResponse:
+def calculate_minimum_partition(full_system: np.ndarray, binary_distribution: str) -> MinimumPartitionResponse:
     """
     Calculate the minimum partition of a system given a matrix and a binary distribution.
 
     Args:
         original_system (list): The original system.
-        matrix (np.ndarray): The matrix of the system.
         binary_distribution (str): The binary distribution of the system.
 
     Returns:
         MinimumPartitionResponse: The minimum partition of the system with its details
     """
-    memo = Memo(binary_distribution=binary_distribution)
-    partitions = gen_system_partitions(matrix)
-    base_effect = tuple(matrix[0])
-    base_cause = tuple(matrix[1])
+    system_shape_rows, system_shape_columns = full_system.shape
 
-    full_system = np.array(full_system)
+    memo = Memo(binary_distribution=binary_distribution)
+    base_effect = tuple(range(round(system_shape_columns/2)))
+    base_cause = tuple(range(round(math.log2(system_shape_rows))))
+    partitions = gen_system_partitions([base_effect, base_cause])
 
     original_distribution = get_probability_distribution(p_matrix=full_system, binary_distribution=binary_distribution, target_effect=base_effect, target_cause=base_cause, base_cause=base_cause, memo=memo)
 
