@@ -34,3 +34,9 @@ export async function RunCheckBipartite(graphId: string) {
     return response.data;
   })
 }
+
+export async function RunStrategy(strategy_number: string, data: any) {
+  return await axios.post(`${API_HOST}/api/bipartite/minimum-partition/e${strategy_number}`, data).then((response) => {
+    return response.data;
+  })
+}
