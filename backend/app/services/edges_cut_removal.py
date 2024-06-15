@@ -87,7 +87,9 @@ def evaluate_edge_removal(g: GraphSchema, labels: dict, p_matrix: np.ndarray, or
         g.update_edge_weight(
             from_node_id=from_node_id,
             to_node_id=to_node_id,
-            new_weight=0.0
+            new_weight=0.0,
+            color="#FF6B6B",
+            lineType="dashed"
         )
 
         edges_to_restore.append((from_node_id, to_node_id))
@@ -110,17 +112,8 @@ def evaluate_edge_removal(g: GraphSchema, labels: dict, p_matrix: np.ndarray, or
 
     return removal_result
 
-def calculate_edges_costs(p_matrix: np.ndarray, binary_distribution: str, presentNodesCount: int, futureNodesCount: int, base_effect: tuple, base_cause: tuple):
+def calculate_edges_costs(p_matrix: np.ndarray, binary_distribution: str, presentNodesCount: int, futureNodesCount: int, base_effect: tuple, base_cause: tuple, g: GraphSchema):
     original_distribution = product_tensor(p_matrix, row=get_binary_position(binary=binary_distribution))
-
-    g_dict = GenerateGraph(
-      GenGraphInput(
-        nodesNumber=presentNodesCount+futureNodesCount,
-        isBipartite=True,
-        presentNodesCount=presentNodesCount,
-        futureNodesCount=futureNodesCount,
-      )
-    )
 
     cause_labels = generateNodeLabels(presentNodesCount)
     effect_labels = generateNodeLabels(futureNodesCount)
@@ -133,8 +126,6 @@ def calculate_edges_costs(p_matrix: np.ndarray, binary_distribution: str, presen
       "effects": {l+"'": i for i, l in enumerate(effect_labels) },
       "causes": {l: i for i, l in enumerate(cause_labels) }
     }
-
-    g = TransformToGraphSchema(g_dict)
 
     p_m = p_matrix.copy()
     adjayency_matrix = np.zeros((presentNodesCount, futureNodesCount))
@@ -214,14 +205,28 @@ def calculate_edges_cut(p_matrix: np.ndarray, binary_distribution: str, presentN
         binary_distribution=binary_distribution,
     )
 
+    g_dict = GenerateGraph(
+      GenGraphInput(
+        nodesNumber=presentNodesCount+futureNodesCount,
+        isBipartite=True,
+        presentNodesCount=presentNodesCount,
+        futureNodesCount=futureNodesCount,
+      )
+    )
+
+    g = TransformToGraphSchema(g_dict)
+
     min_cut, adjayency_matrix = calculate_edges_costs(
         p_matrix=p_matrix,
         binary_distribution=binary_distribution,
         presentNodesCount=presentNodesCount,
         futureNodesCount=futureNodesCount,
         base_effect=base_effect,
-        base_cause=base_cause
+        base_cause=base_cause,
+        g=g
     )
+
+    response.graph = g.model_dump()
 
     if min_cut.cost < float('inf'):
         response.distance = min_cut.cost

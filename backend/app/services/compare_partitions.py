@@ -48,6 +48,7 @@ class MinimumPartitionResponse(BaseModel):
     original_distribution: Optional[list] = None
     min_cut_distribution: Optional[list] = None
     stats: Optional[dict] = Field(default={ "elapsed_time_secs": 0.0 })
+    graph: Optional[dict] = None
 
 def find_insertion_pos(l, to_insert):
     for i, num in enumerate(l):
