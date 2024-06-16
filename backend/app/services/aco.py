@@ -8,7 +8,7 @@ from .edges_cut_removal import calculate_edges_costs
 from .compare_partitions import MinimumPartitionResponse
 
 class AntColony:
-    def _init_(self, graph, n_ants, n_best, n_iterations, decay, alpha=1, beta=1):
+    def __init__(self, graph, n_ants, n_best, n_iterations, decay, alpha=1, beta=1):
         self.graph = graph
         self.n_ants = n_ants
         self.n_best = n_best
@@ -22,11 +22,14 @@ class AntColony:
         best_solutions = []
         for i in range(self.n_iterations):
             all_paths = self.construct_solutions()
+            if i ==1:
+                print("la feromona",self.pheromone)
             self.spread_pheronome(all_paths, self.n_best)
             best_solutions.append(min(all_paths, key=lambda x: x[1]))
             self.pheromone = self.evaporate_pheromone()
 
         partitions = self.generate_partitions()
+        print("la feromona",self.pheromone)
         return best_solutions, partitions
 
     def construct_solutions(self):
@@ -68,8 +71,12 @@ class AntColony:
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, dist in sorted_paths[:n_best]:
             for move in path:
-                if self.graph[move[0]][move[1]] > 0:  # Evitar división por cero
-                    self.pheromone[move[0]][move[1]] += 1.0 / self.graph[move[0]][move[1]]
+                weight = self.graph[move[0]][move[1]]
+                if weight > 0:  # Evitar división por cero
+                    self.pheromone[move[0]][move[1]] += 1.0 / weight
+
+
+
 
     def evaporate_pheromone(self):
         return [[self.decay * phero for phero in row] for row in self.pheromone]
@@ -80,9 +87,11 @@ class AntColony:
         for i in range(len(self.pheromone)):
             for j in range(len(self.pheromone[i])):
                 if self.pheromone[i][j] > threshold:
-                    partitions['A'].add((i, j))
+                    partitions['A'].add(i)
+                    partitions['A'].add(j)
                 else:
-                    partitions['B'].add((i, j))
+                    partitions['B'].add(i)
+                    partitions['B'].add(j)
         return partitions
 
 def run_aco(p_matrix: np.ndarray, binary_distribution: str, presentNodesCount: int, futureNodesCount: int, base_effect: tuple, base_cause: tuple):
@@ -122,7 +131,7 @@ def run_aco(p_matrix: np.ndarray, binary_distribution: str, presentNodesCount: i
         return response
 
     # ACO based con adjayency matrix
-    ant_colony = AntColony(adjayency_matrix, len(adjayency_matrix)*2, 2, 100, 0.85, alpha=1, beta=1)
+    ant_colony = AntColony(adjayency_matrix, len(adjayency_matrix)*2, 2, 100, 0.85, alpha=-1, beta=1)
     best_solutions, partitions = ant_colony.run()
     response.partition = partitions
 
