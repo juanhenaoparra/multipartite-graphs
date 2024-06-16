@@ -10,6 +10,7 @@ from ..models import graph as graph_model
 from ..services.matching import CheckBipartite, NotBipartiteException, BipartiteMatchResponse
 from ..services.compare_partitions import calculate_minimum_partition
 from ..services.edges_cut_removal import calculate_edges_cut
+from ..services.aco import run_aco
 from ..services.matrix import get_subsystem_distribution
 
 def check_bipartiteness(db: Session, graph_name: str) -> BipartiteMatchResponse:
@@ -65,6 +66,32 @@ def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, 
     causes_size = round(math.log2(system_shape_rows))
 
     res = calculate_edges_cut(
+        p_matrix=full_system,
+        binary_distribution=binary_distribution,
+        futureNodesCount=effects_size,
+        presentNodesCount=causes_size,
+        base_effect=tuple(range(effects_size)),
+        base_cause=tuple(range(causes_size)),
+    )
+
+    res.stats["elapsed_time_secs"] = (datetime.datetime.now() - start_date).total_seconds()
+
+    return res
+
+def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, subsystem) -> float:
+    start_date = datetime.datetime.now()
+    full_system = np.array(full_system)
+
+    if subsystem is not None:
+        full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))
+        binary_distribution = "".join([binary_distribution[i] for i in subsystem[1]])
+
+    system_shape_rows, system_shape_columns = full_system.shape
+
+    effects_size = round(system_shape_columns/2)
+    causes_size = round(math.log2(system_shape_rows))
+
+    res = run_aco(
         p_matrix=full_system,
         binary_distribution=binary_distribution,
         futureNodesCount=effects_size,

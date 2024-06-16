@@ -47,6 +47,7 @@ async def create_random_graph(graph_input: gen_schema.GenGraphInput, db: Session
 async def check_bipartiteness(graph_name: str, db: Session = Depends(get_db)):
     return process_controller.check_bipartiteness(db, graph_name)
 
+# Calculate minimum partition using dynamic programming
 @router.post("/bipartite/minimum-partition/e1")
 async def calculate_partition_distance(partition_input: bipartite_schema.SystemPartitionInput, db: Session = Depends(get_db)):
     return process_controller.calculate_partition_distance(
@@ -56,9 +57,20 @@ async def calculate_partition_distance(partition_input: bipartite_schema.SystemP
         subsystem=partition_input.subsystem,
     )
 
+# Calculate minimum partition using edge removal with local search
 @router.post("/bipartite/minimum-partition/e2")
 async def calculate_partition_distance_v2(partition_input: bipartite_schema.SystemPartitionInput, db: Session = Depends(get_db)):
     return process_controller.calculate_edges_cut_distance(
+        db=db,
+        full_system=partition_input.full_system,
+        binary_distribution=partition_input.binary_distribution,
+        subsystem=partition_input.subsystem,
+    )
+
+# Calculate minimum partition using algorithm inspired in Ant Colony Optimization (ACO)
+@router.post("/bipartite/minimum-partition/e3")
+async def calculate_partition_distance_v3(partition_input: bipartite_schema.SystemPartitionInput, db: Session = Depends(get_db)):
+    return process_controller.calculate_min_cut_with_aco(
         db=db,
         full_system=partition_input.full_system,
         binary_distribution=partition_input.binary_distribution,
