@@ -171,11 +171,11 @@ def walk_heatmap_desc(adj_matrix: np.ndarray):
 
     min_cut = MinCut()
     min_cut.cost = rows_sum[rows_order[-1]]
-    min_cut.partition = [[], [rows_order[-1]]]
+    min_cut.partition = [[], [rows_order[-1].tolist()]]
 
     if columns_sum[columns_order[-1]] < min_cut.cost:
         min_cut.cost = columns_sum[columns_order[-1]]
-        min_cut.partition = [[columns_order[-1]], []]
+        min_cut.partition = [[columns_order[-1].tolist()], []]
 
     for i, col in enumerate(columns_order[:-1]):
         rows_hold = rows_order[:rows_count+1]
@@ -191,7 +191,7 @@ def walk_heatmap_desc(adj_matrix: np.ndarray):
 
         if partition_cost < min_cut.cost:
             min_cut.cost = partition_cost
-            min_cut.partition = [cols_hold, rows_hold]
+            min_cut.partition = [cols_hold.tolist(), rows_hold.tolist()]
 
         if rows_count < top_limit_rows:
             rows_count += 1
@@ -234,8 +234,9 @@ def calculate_edges_cut(p_matrix: np.ndarray, binary_distribution: str, presentN
 
         return response
 
+
     wal_res = walk_heatmap_desc(adj_matrix=adjayency_matrix)
-    response.distance = wal_res.cost
+    response.distance = int(wal_res.cost)
     response.partition = wal_res.partition
 
     return response
