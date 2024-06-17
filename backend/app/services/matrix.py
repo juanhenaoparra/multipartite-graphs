@@ -32,6 +32,8 @@ def get_emd(_a, _b):
             k: hamming_distance(k, le_A_key)
             for k, v in dB.items()
         }
+        if not all_b_keys:
+            break
 
         minimum = min(all_b_keys, key=all_b_keys.get)
         b_key = le_keys.index(str_bin(minimum, max_len))
