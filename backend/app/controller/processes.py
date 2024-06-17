@@ -76,6 +76,7 @@ def calculate_partition_distance(db: Session, full_system, binary_distribution, 
 
     if candidate is not None:
         full_system = full_system[:8]
+        binary_distribution = binary_distribution[:3]
 
     if merged_matrix:
         full_system = unmerge_matrix(full_system)
@@ -102,6 +103,7 @@ def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, 
 
     if candidate is not None:
         full_system = full_system[:8]
+        binary_distribution = binary_distribution[:3]
 
     if merged_matrix:
         full_system = unmerge_matrix(full_system)
@@ -137,6 +139,7 @@ def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, su
 
     if candidate is not None:
         full_system = full_system[:8]
+        binary_distribution = binary_distribution[:3]
 
     if merged_matrix:
         full_system = unmerge_matrix(full_system)
