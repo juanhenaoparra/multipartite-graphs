@@ -11,7 +11,7 @@ from ..services.matching import CheckBipartite, NotBipartiteException, Bipartite
 from ..services.compare_partitions import calculate_minimum_partition
 from ..services.edges_cut_removal import calculate_edges_cut
 from ..services.aco import run_aco
-from ..services.matrix import get_subsystem_distribution
+from ..services.matrix import get_subsystem_distribution, recursive_marginalization
 
 def check_bipartiteness(db: Session, graph_name: str) -> BipartiteMatchResponse:
     graph = db.query(graph_model.Graph).filter(graph_model.Graph.name == graph_name).first()
@@ -35,9 +35,28 @@ def check_bipartiteness(db: Session, graph_name: str) -> BipartiteMatchResponse:
         db.commit()
         db.refresh(graph)
 
-def calculate_partition_distance(db: Session, full_system, binary_distribution, subsystem) -> float:
+def unmerge_matrix(full_system: np.ndarray):
+    m, n = full_system.shape
+    tensors_quantity = round(math.log2(n))
+    new_full_matrix = np.zeros((m, 2*tensors_quantity))
+
+    counter = 0
+    for i in range(tensors_quantity):
+        new_full_matrix[:, [counter, counter+1]] = recursive_marginalization(
+            matrix=full_system,
+            tensors=tensors_quantity,
+            positions=[j for j in range(tensors_quantity) if j != i],
+            axis=0)
+        counter += 2
+
+    return new_full_matrix
+
+def calculate_partition_distance(db: Session, full_system, binary_distribution, subsystem, merged_matrix) -> float:
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
+
+    if merged_matrix:
+        full_system = unmerge_matrix(full_system)
 
     if subsystem is not None:
         full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))
@@ -52,9 +71,12 @@ def calculate_partition_distance(db: Session, full_system, binary_distribution, 
 
     return res
 
-def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, subsystem) -> float:
+def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, subsystem, merged_matrix) -> float:
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
+
+    if merged_matrix:
+        full_system = unmerge_matrix(full_system)
 
     if subsystem is not None:
         full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))
@@ -78,9 +100,12 @@ def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, 
 
     return res
 
-def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, subsystem) -> float:
+def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, subsystem, merged_matrix) -> float:
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
+
+    if merged_matrix:
+        full_system = unmerge_matrix(full_system)
 
     if subsystem is not None:
         full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))

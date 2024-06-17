@@ -55,6 +55,7 @@ async def calculate_partition_distance(partition_input: bipartite_schema.SystemP
         full_system=partition_input.full_system,
         binary_distribution=partition_input.binary_distribution,
         subsystem=partition_input.subsystem,
+        merged_matrix=partition_input.merged_matrix,
     )
 
 # Calculate minimum partition using edge removal with local search
@@ -65,6 +66,7 @@ async def calculate_partition_distance_v2(partition_input: bipartite_schema.Syst
         full_system=partition_input.full_system,
         binary_distribution=partition_input.binary_distribution,
         subsystem=partition_input.subsystem,
+        merged_matrix=partition_input.merged_matrix,
     )
 
 # Calculate minimum partition using algorithm inspired in Ant Colony Optimization (ACO)
@@ -75,4 +77,5 @@ async def calculate_partition_distance_v3(partition_input: bipartite_schema.Syst
         full_system=partition_input.full_system,
         binary_distribution=partition_input.binary_distribution,
         subsystem=partition_input.subsystem,
+        merged_matrix=partition_input.merged_matrix,
     )
