@@ -32,5 +32,6 @@ class SystemPartitionInput(BaseModel):
     full_system: List[List[float]]
     binary_distribution: str
     subsystem: Optional[List[List[int]]] = None
+    candidate: Optional[List[int]] = None
     merged_matrix: Optional[bool] = False
     complete_position: Optional[int] = None

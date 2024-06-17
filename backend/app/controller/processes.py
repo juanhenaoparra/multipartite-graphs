@@ -67,12 +67,15 @@ def complete_matrix(full_matrix: np.ndarray, position: int):
 
   return new_full_matrix
 
-def calculate_partition_distance(db: Session, full_system, binary_distribution, subsystem, merged_matrix, complete_position=None) -> float:
+def calculate_partition_distance(db: Session, full_system, binary_distribution, subsystem, merged_matrix, complete_position=None, candidate=None) -> float:
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
 
     if complete_position is not None:
         full_system = complete_matrix(full_matrix=full_system, position=complete_position)
+
+    if candidate is not None:
+        full_system = full_system[:8]
 
     if merged_matrix:
         full_system = unmerge_matrix(full_system)
@@ -90,12 +93,15 @@ def calculate_partition_distance(db: Session, full_system, binary_distribution, 
 
     return res
 
-def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, subsystem, merged_matrix, complete_position=None) -> float:
+def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, subsystem, merged_matrix, complete_position=None, candidate=None) -> float:
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
 
     if complete_position is not None:
         full_system = complete_matrix(full_matrix=full_system, position=complete_position)
+
+    if candidate is not None:
+        full_system = full_system[:8]
 
     if merged_matrix:
         full_system = unmerge_matrix(full_system)
@@ -122,12 +128,15 @@ def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, 
 
     return res
 
-def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, subsystem, merged_matrix, complete_position=None) -> float:
+def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, subsystem, merged_matrix, complete_position=None, candidate=None) -> float:
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
 
     if complete_position is not None:
         full_system = complete_matrix(full_matrix=full_system, position=complete_position)
+
+    if candidate is not None:
+        full_system = full_system[:8]
 
     if merged_matrix:
         full_system = unmerge_matrix(full_system)
