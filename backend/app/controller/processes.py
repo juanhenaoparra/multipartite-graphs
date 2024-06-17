@@ -71,11 +71,11 @@ def calculate_partition_distance(db: Session, full_system, binary_distribution, 
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
 
-    if merged_matrix:
-        full_system = unmerge_matrix(full_system)
-
     if complete_position is not None:
         full_system = complete_matrix(full_matrix=full_system, position=complete_position)
+
+    if merged_matrix:
+        full_system = unmerge_matrix(full_system)
 
     if subsystem is not None:
         full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))
@@ -94,11 +94,11 @@ def calculate_edges_cut_distance(db: Session, full_system, binary_distribution, 
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
 
-    if merged_matrix:
-        full_system = unmerge_matrix(full_system)
-
     if complete_position is not None:
         full_system = complete_matrix(full_matrix=full_system, position=complete_position)
+
+    if merged_matrix:
+        full_system = unmerge_matrix(full_system)
 
     if subsystem is not None:
         full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))
@@ -126,11 +126,11 @@ def calculate_min_cut_with_aco(db: Session, full_system, binary_distribution, su
     start_date = datetime.datetime.now()
     full_system = np.array(full_system)
 
-    if merged_matrix:
-        full_system = unmerge_matrix(full_system)
-
     if complete_position is not None:
         full_system = complete_matrix(full_matrix=full_system, position=complete_position)
+
+    if merged_matrix:
+        full_system = unmerge_matrix(full_system)
 
     if subsystem is not None:
         full_system = get_subsystem_distribution(matrix=full_system, axis=1, effect=tuple(subsystem[0]), cause=tuple(subsystem[1]))
